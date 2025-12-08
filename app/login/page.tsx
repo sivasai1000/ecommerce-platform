@@ -56,30 +56,47 @@ function LoginContent() {
     };
 
     return (
-        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950 py-12 px-4 selection:bg-primary selection:text-primary-foreground">
-            {/* Ambient Background Effects */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-400/20 blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-blob" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-400/20 blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-blob animation-delay-2000" />
-            <div className="absolute top-[20%] right-[20%] w-[30%] h-[30%] rounded-full bg-pink-400/20 blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-blob animation-delay-4000" />
+        <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
 
-            <Card className="relative w-full max-w-md border-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-2xl ring-1 ring-slate-200/50 dark:ring-slate-700/50">
-                <CardHeader className="space-y-1 text-center pb-8 pt-10">
-                    <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
-                        Welcome Back
-                    </CardTitle>
-                    <CardDescription className="text-base text-slate-600 dark:text-slate-400">
-                        Sign in to continue your shopping journey
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
+            {/* Left Panel: Image/Branding (Desktop Only) */}
+            <div className="hidden bg-stone-900 lg:block relative overflow-hidden">
+                <div
+                    className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-60 mix-blend-overlay"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent" />
+
+                <div className="relative h-full flex flex-col justify-between p-12 text-stone-50">
+                    <div className="flex items-center space-x-2">
+                        <span className="text-2xl font-serif font-bold tracking-tight">
+                            FUNSTORE.
+                        </span>
+                    </div>
+                    <div className="space-y-4">
+                        <h2 className="text-4xl font-serif font-medium leading-tight">
+                            "Fashion is the armor to survive the reality of everyday life."
+                        </h2>
+                        <p className="text-stone-300 text-lg">
+                            — Bill Cunningham
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Panel: Form */}
+            <div className="flex items-center justify-center py-12 px-4 md:px-12 lg:px-24 bg-white dark:bg-stone-950">
+                <div className="mx-auto grid w-full max-w-[400px] gap-6">
+                    <div className="text-center space-y-2 mb-8">
+                        <h1 className="text-3xl font-serif font-medium tracking-tight text-stone-900 dark:text-stone-50">
+                            Welcome Back
+                        </h1>
+                        <p className="text-stone-500 dark:text-stone-400">
+                            Enter your email below to login to your account
+                        </p>
+                    </div>
+
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
-                            <Label
-                                htmlFor="email"
-                                className="text-sm font-medium text-slate-700 dark:text-slate-300"
-                            >
-                                Email Address
-                            </Label>
+                            <Label htmlFor="email" className="uppercase text-xs font-bold tracking-widest text-stone-500">Email</Label>
                             <Input
                                 id="email"
                                 name="email"
@@ -88,20 +105,15 @@ function LoginContent() {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="h-11 bg-white/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                                className="h-12 bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-800 focus-visible:ring-stone-400 rounded-none"
                             />
                         </div>
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <Label
-                                    htmlFor="password"
-                                    className="text-sm font-medium text-slate-700 dark:text-slate-300"
-                                >
-                                    Password
-                                </Label>
+                                <Label htmlFor="password" className="uppercase text-xs font-bold tracking-widest text-stone-500">Password</Label>
                                 <Link
                                     href="/forgot-password"
-                                    className="text-xs text-primary hover:text-primary/80 transition-colors font-medium"
+                                    className="text-xs text-stone-500 hover:text-stone-900 dark:hover:text-stone-300 underline-offset-4 hover:underline"
                                 >
                                     Forgot password?
                                 </Link>
@@ -113,37 +125,26 @@ function LoginContent() {
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
-                                className="h-11 bg-white/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                                className="h-12 bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-800 focus-visible:ring-stone-400 rounded-none"
                             />
                         </div>
                         <Button
                             type="submit"
-                            className="w-full h-11 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
+                            className="w-full h-12 bg-stone-900 text-stone-50 hover:bg-stone-800 dark:bg-stone-50 dark:text-stone-900 dark:hover:bg-stone-200 rounded-none uppercase tracking-widest font-bold"
                             disabled={loading}
                         >
-                            {loading ? (
-                                <div className="flex items-center gap-2">
-                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                                    <span>Signing in...</span>
-                                </div>
-                            ) : (
-                                "Sign in to Account"
-                            )}
+                            {loading ? "Signing in..." : "Sign In"}
                         </Button>
                     </form>
-                </CardContent>
-                <CardFooter className="flex flex-col space-y-4 text-center pb-8">
-                    <div className="text-sm text-slate-500 dark:text-slate-400">
+
+                    <div className="text-center text-sm text-stone-500 dark:text-stone-400 mt-6">
                         Don't have an account?{" "}
-                        <Link
-                            href="/register"
-                            className="font-semibold text-primary hover:text-primary/80 transition-colors hover:underline underline-offset-4"
-                        >
-                            Create an account
+                        <Link href="/register" className="font-semibold text-stone-900 dark:text-stone-50 hover:underline underline-offset-4">
+                            Sign up
                         </Link>
                     </div>
-                </CardFooter>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 }
