@@ -69,8 +69,8 @@ export default function Navbar() {
                 </Sheet>
 
                 {/* Logo */}
-                <Link href="/" className="mr-6 flex items-center space-x-2">
-                    <span className="text-2xl font-serif font-bold tracking-tight text-stone-900 dark:text-stone-50">
+                <Link href="/" className="mr-2 md:mr-6 flex items-center space-x-2">
+                    <span className="text-xl md:text-2xl font-serif font-bold tracking-tight text-stone-900 dark:text-stone-50">
                         FUNSTORE.
                     </span>
                 </Link>

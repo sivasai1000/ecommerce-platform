@@ -277,16 +277,16 @@ export default function Home() {
           <p className="text-stone-400 dark:text-stone-600 mb-8 leading-relaxed">
             Sign up for our newsletter to receive exclusive offers, latest news, and a 10% discount on your first order.
           </p>
-          <form onSubmit={handleSubscribe} className="flex w-full max-w-md mx-auto gap-4">
+          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row w-full max-w-md mx-auto gap-4">
             <input
               type="email"
               placeholder="Enter your email address"
-              className="flex-1 h-12 px-4 bg-stone-800 dark:bg-stone-100 border border-stone-700 dark:border-stone-200 rounded-none focus:outline-none focus:border-stone-500 transition-colors"
+              className="w-full sm:flex-1 h-12 px-4 bg-stone-800 dark:bg-stone-100 border border-stone-700 dark:border-stone-200 rounded-none focus:outline-none focus:border-stone-500 transition-colors"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <Button type="submit" size="lg" className="h-12 px-8 bg-stone-100 text-stone-900 hover:bg-white dark:bg-stone-900 dark:text-white dark:hover:bg-stone-800 rounded-none uppercase tracking-widest font-bold">
+            <Button type="submit" size="lg" className="h-12 w-full sm:w-auto px-8 bg-stone-100 text-stone-900 hover:bg-white dark:bg-stone-900 dark:text-white dark:hover:bg-stone-800 rounded-none uppercase tracking-widest font-bold">
               Subscribe
             </Button>
           </form>
