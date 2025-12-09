@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 export default function WishlistPage() {
     const { wishlistItems, removeFromWishlist } = useWishlist();
-    const { addToCart } = useCart();
+    const { addToCart, cartItems } = useCart();
 
     const moveToCart = (item: any) => {
         addToCart({
@@ -37,28 +37,57 @@ export default function WishlistPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {wishlistItems.map((item) => {
                         const imageSrc = item.image && item.image.trim().length > 0 ? item.image : "/placeholder-image.png";
+                        const isAddedToCart = cartItems.some(cartItem => cartItem.id === item.id);
+
                         return (
                             <Card key={item.id} className="overflow-hidden">
                                 <div className="aspect-square relative overflow-hidden bg-gray-100">
-                                    <img
-                                        src={imageSrc}
-                                        alt={item.name}
-                                        className="h-full w-full object-cover"
-                                        onError={(e) => {
-                                            e.currentTarget.src = "/placeholder-image.png";
-                                        }}
-                                    />
+                                    <Link href={`/product/${item.id}`} className="block h-full w-full">
+                                        <img
+                                            src={imageSrc}
+                                            alt={item.name}
+                                            className={`h-full w-full object-cover ${item.stock === 0 ? "opacity-50 grayscale" : ""}`}
+                                            onError={(e) => {
+                                                e.currentTarget.src = "/placeholder-image.png";
+                                            }}
+                                        />
+                                    </Link>
+                                    {item.stock === 0 && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                                            <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                                Out of Stock
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                                 <CardContent className="p-4">
-                                    <h3 className="font-semibold line-clamp-1">{item.name}</h3>
+                                    <h3 className="font-semibold line-clamp-1">
+                                        <Link href={`/product/${item.id}`} className="hover:underline">
+                                            {item.name}
+                                        </Link>
+                                    </h3>
                                     <p className="text-sm text-muted-foreground mb-2">{item.category}</p>
                                     <p className="font-bold text-lg mb-4">${item.price}</p>
 
                                     <div className="flex gap-2">
-                                        <Button className="flex-1" onClick={() => moveToCart(item)}>
-                                            <ShoppingCart className="w-4 h-4 mr-2" />
-                                            Cart
-                                        </Button>
+                                        {item.stock > 0 ? (
+                                            isAddedToCart ? (
+                                                <Link href="/cart" className="flex-1">
+                                                    <Button className="w-full" variant="secondary">
+                                                        View Cart
+                                                    </Button>
+                                                </Link>
+                                            ) : (
+                                                <Button className="flex-1" onClick={() => moveToCart(item)}>
+                                                    <ShoppingCart className="w-4 h-4 mr-2" />
+                                                    Add to Cart
+                                                </Button>
+                                            )
+                                        ) : (
+                                            <Button className="flex-1" disabled>
+                                                Out of Stock
+                                            </Button>
+                                        )}
                                         <Button
                                             variant="outline"
                                             size="icon"

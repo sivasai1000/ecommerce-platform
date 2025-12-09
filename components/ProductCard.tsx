@@ -59,7 +59,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                 name: product.name,
                 price: product.price,
                 image: product.imageUrl,
-                category: product.category
+                category: product.category,
+                stock: product.stock
             });
             toast.success("Added to wishlist");
         }

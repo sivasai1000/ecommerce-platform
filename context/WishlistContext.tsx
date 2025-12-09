@@ -9,6 +9,7 @@ interface WishlistItem {
     price: number;
     image: string;
     category: string;
+    stock: number;
 }
 
 interface WishlistContextType {
@@ -49,6 +50,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
                     price: Number(item.Product.price),
                     image: item.Product.imageUrl || "/placeholder-image.png", // Ensure fallback at source
                     category: item.Product.category,
+                    stock: item.Product.stock,
                     wishlistId: item.id // Store the wishlist record ID if needed for deletion
                 }));
                 setWishlistItems(mappedItems);

@@ -15,6 +15,7 @@ interface Product {
   imageUrl: string;
   category: string;
   description: string;
+  stock: number;
 }
 
 interface Banner {
