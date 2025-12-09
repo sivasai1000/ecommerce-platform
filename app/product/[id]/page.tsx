@@ -29,11 +29,14 @@ interface Review {
     createdAt: string;
 }
 
+import { useWishlist } from "@/context/WishlistContext";
+
 export default function ProductDetailPage() {
     const { id } = useParams();
     const router = useRouter();
     const { token } = useAuth();
     const { addToCart, cartItems } = useCart();
+    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
     const [product, setProduct] = useState<Product | null>(null);
     const [reviews, setReviews] = useState<Review[]>([]);
@@ -96,6 +99,24 @@ export default function ProductDetailPage() {
         }
     };
 
+    const toggleWishlist = () => {
+        if (!product) return;
+        if (isInWishlist(product.id)) {
+            removeFromWishlist(product.id);
+            toast.info("Removed from wishlist");
+        } else {
+            addToWishlist({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.imageUrl,
+                category: product.category,
+                stock: product.stock
+            });
+            toast.success("Added to wishlist");
+        }
+    };
+
     if (loading) {
         return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     }
@@ -139,7 +160,9 @@ export default function ProductDetailPage() {
                             <ShoppingCart className="mr-2 h-5 w-5" />
                             {product.stock > 0 ? (isAddedToCart ? "View Cart" : "Add to Cart") : "Out of Stock"}
                         </Button>
-                        <Button size="lg" variant="outline" className="px-4"><Heart className="h-5 w-5" /></Button>
+                        <Button size="lg" variant="outline" className="px-4" onClick={toggleWishlist}>
+                            <Heart className={`h-5 w-5 ${isInWishlist(product.id) ? "fill-red-500 text-red-500" : ""}`} />
+                        </Button>
                     </div>
                 </div>
             </div>
