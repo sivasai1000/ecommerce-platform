@@ -16,6 +16,7 @@ interface Product {
     imageUrl: string;
     category: string;
     subcategory?: string;
+    stock: number;
 }
 
 function ProductsList() {
