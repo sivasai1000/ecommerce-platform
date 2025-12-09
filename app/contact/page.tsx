@@ -46,34 +46,73 @@ export default function ContactPage() {
 
             <div className="grid md:grid-cols-2 gap-12">
                 {/* Contact Info / Content */}
+                {/* Contact Info / Content */}
                 <div className="space-y-8">
-                    <div
-                        className="prose prose-lg max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: pageData.content.replace(/\n/g, '<br/>') }}
-                    />
+                    {/* Intro Text */}
+                    <div className="prose prose-lg max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed">
+                        {(() => {
+                            try {
+                                const parsed = JSON.parse(pageData.content);
+                                return parsed.intro || parsed.content || ""; // Handle JSON object
+                            } catch (e) {
+                                return <div dangerouslySetInnerHTML={{ __html: pageData.content.replace(/\n/g, '<br/>') }} />; // Handle legacy HTML string
+                            }
+                        })()}
+                    </div>
 
                     <div className="space-y-6 pt-8 border-t">
-                        <div className="flex items-start space-x-4">
-                            <MapPin className="w-6 h-6 text-gray-900 mt-1" />
-                            <div>
-                                <h3 className="font-semibold text-lg">Visit Us</h3>
-                                <p className="text-gray-600">123 Commerce St, Market City<br />ST 12345, United States</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start space-x-4">
-                            <Mail className="w-6 h-6 text-gray-900 mt-1" />
-                            <div>
-                                <h3 className="font-semibold text-lg">Email Us</h3>
-                                <p className="text-gray-600">support@sivasai.com</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start space-x-4">
-                            <Phone className="w-6 h-6 text-gray-900 mt-1" />
-                            <div>
-                                <h3 className="font-semibold text-lg">Call Us</h3>
-                                <p className="text-gray-600">+1 (555) 123-4567</p>
-                            </div>
-                        </div>
+                        {(() => {
+                            let parsed = { address: "", email: "", phone: "", hours: "" };
+                            try {
+                                parsed = JSON.parse(pageData.content);
+                            } catch (e) {
+                                // If legacy string, we don't have structured data, so we might show defaults or hide
+                                // For now, let's keep defaults if it's legacy so the page isn't empty
+                                parsed = {
+                                    address: "123 Commerce St, Market City\nST 12345, United States",
+                                    email: "support@sivasai.com",
+                                    phone: "+1 (555) 123-4567",
+                                    hours: ""
+                                };
+                            }
+
+                            return (
+                                <>
+                                    <div className="flex items-start space-x-4">
+                                        <MapPin className="w-6 h-6 text-gray-900 mt-1" />
+                                        <div>
+                                            <h3 className="font-semibold text-lg">Visit Us</h3>
+                                            <p className="text-gray-600 whitespace-pre-wrap">{parsed.address || "Address not available"}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-4">
+                                        <Mail className="w-6 h-6 text-gray-900 mt-1" />
+                                        <div>
+                                            <h3 className="font-semibold text-lg">Email Us</h3>
+                                            <p className="text-gray-600">{parsed.email || "Email not available"}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-4">
+                                        <Phone className="w-6 h-6 text-gray-900 mt-1" />
+                                        <div>
+                                            <h3 className="font-semibold text-lg">Call Us</h3>
+                                            <p className="text-gray-600">{parsed.phone || "Phone not available"}</p>
+                                        </div>
+                                    </div>
+                                    {parsed.hours && (
+                                        <div className="flex items-start space-x-4">
+                                            <div className="w-6 h-6 flex items-center justify-center mt-1">
+                                                <span className="text-xl font-bold">🕒</span>
+                                            </div>
+                                            <div>
+                                                <h3 className="font-semibold text-lg">Hours</h3>
+                                                <p className="text-gray-600">{parsed.hours}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
                     </div>
                 </div>
 
