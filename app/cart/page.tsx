@@ -137,72 +137,70 @@ export default function CartPage() {
                             </div>
 
                             {/* Smart Coupon Suggestions */}
-                            {!appliedCoupon && (
-                                <div className="space-y-4 pt-2">
-                                    {/* Eligible Coupons */}
-                                    {availableCoupons.filter(c => !c.minOrderValue || cartTotal >= Number(c.minOrderValue)).length > 0 && (
-                                        <div className="space-y-2">
-                                            <p className="text-xs font-semibold text-green-600 uppercase tracking-wide">Available Now</p>
-                                            <div className="flex flex-col gap-2">
-                                                {availableCoupons
-                                                    .filter(c => !c.minOrderValue || cartTotal >= Number(c.minOrderValue))
-                                                    .map(coupon => (
-                                                        <div
-                                                            key={coupon.id}
-                                                            className="border border-green-200 bg-green-50/50 rounded-lg p-3 cursor-pointer hover:bg-green-100 transition-colors flex justify-between items-center group"
-                                                            onClick={() => applyCoupon(coupon.code)}
-                                                        >
-                                                            <div>
-                                                                <span className="font-bold text-green-700 block">{coupon.code}</span>
-                                                                <span className="text-xs text-green-600">
-                                                                    {coupon.discountType === 'percentage' ? `${coupon.value}% OFF` : `$${coupon.value} OFF`}
+                            <div className="space-y-4 pt-2">
+                                {/* Eligible Coupons - Show only if NO coupon applied */}
+                                {!appliedCoupon && availableCoupons.filter(c => !c.minOrderValue || cartTotal >= Number(c.minOrderValue)).length > 0 && (
+                                    <div className="space-y-2">
+                                        <p className="text-xs font-semibold text-green-600 uppercase tracking-wide">Available Now</p>
+                                        <div className="flex flex-col gap-2">
+                                            {availableCoupons
+                                                .filter(c => !c.minOrderValue || cartTotal >= Number(c.minOrderValue))
+                                                .map(coupon => (
+                                                    <div
+                                                        key={coupon.id}
+                                                        className="border border-green-200 bg-green-50/50 rounded-lg p-3 cursor-pointer hover:bg-green-100 transition-colors flex justify-between items-center group"
+                                                        onClick={() => applyCoupon(coupon.code)}
+                                                    >
+                                                        <div>
+                                                            <span className="font-bold text-green-700 block">{coupon.code}</span>
+                                                            <span className="text-xs text-green-600">
+                                                                {coupon.discountType === 'percentage' ? `${coupon.value}% OFF` : `$${coupon.value} OFF`}
+                                                            </span>
+                                                        </div>
+                                                        <Button size="sm" variant="outline" className="h-7 text-xs border-green-200 text-green-700 bg-white group-hover:bg-green-600 group-hover:text-white">
+                                                            Apply
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Upcoming Coupons (Upsell) - ALWAYS SHOW (excluding applied one) */}
+                                {availableCoupons.filter(c => Number(c.minOrderValue) > cartTotal && c.code !== appliedCoupon).length > 0 && (
+                                    <div className="space-y-2">
+                                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Unlock More Savings</p>
+                                        <div className="flex flex-col gap-2">
+                                            {availableCoupons
+                                                .filter(c => Number(c.minOrderValue) > cartTotal && c.code !== appliedCoupon)
+                                                .sort((a, b) => Number(a.minOrderValue) - Number(b.minOrderValue)) // Sort by nearest target
+                                                .slice(0, 3) // Show top 3 nearest
+                                                .map(coupon => {
+                                                    const needed = Number(coupon.minOrderValue) - cartTotal;
+                                                    return (
+                                                        <div key={coupon.id} className="border border-dashed border-gray-300 rounded-lg p-3 bg-gray-50/50 opacity-75">
+                                                            <div className="flex justify-between items-start mb-1">
+                                                                <span className="font-mono font-bold text-gray-500">{coupon.code}</span>
+                                                                <span className="text-xs font-medium bg-gray-200 px-2 py-0.5 rounded text-gray-600">
+                                                                    Locked
                                                                 </span>
                                                             </div>
-                                                            <Button size="sm" variant="outline" className="h-7 text-xs border-green-200 text-green-700 bg-white group-hover:bg-green-600 group-hover:text-white">
-                                                                Apply
-                                                            </Button>
-                                                        </div>
-                                                    ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Upcoming Coupons (Upsell) */}
-                                    {availableCoupons.filter(c => Number(c.minOrderValue) > cartTotal).length > 0 && (
-                                        <div className="space-y-2">
-                                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Unlock More Savings</p>
-                                            <div className="flex flex-col gap-2">
-                                                {availableCoupons
-                                                    .filter(c => Number(c.minOrderValue) > cartTotal)
-                                                    .sort((a, b) => Number(a.minOrderValue) - Number(b.minOrderValue)) // Sort by nearest target
-                                                    .slice(0, 3) // Show top 3 nearest
-                                                    .map(coupon => {
-                                                        const needed = Number(coupon.minOrderValue) - cartTotal;
-                                                        return (
-                                                            <div key={coupon.id} className="border border-dashed border-gray-300 rounded-lg p-3 bg-gray-50/50 opacity-75">
-                                                                <div className="flex justify-between items-start mb-1">
-                                                                    <span className="font-mono font-bold text-gray-500">{coupon.code}</span>
-                                                                    <span className="text-xs font-medium bg-gray-200 px-2 py-0.5 rounded text-gray-600">
-                                                                        Locked
-                                                                    </span>
-                                                                </div>
-                                                                <p className="text-xs text-gray-500 mb-1">
-                                                                    {coupon.discountType === 'percentage' ? `${coupon.value}% OFF` : `$${coupon.value} OFF`}
-                                                                </p>
-                                                                <div className="text-xs font-medium text-orange-600 flex items-center gap-1">
-                                                                    <span>Add ${needed.toFixed(2)} more</span>
-                                                                    <Link href="/products" className="underline hover:text-orange-800">
-                                                                        Shop
-                                                                    </Link>
-                                                                </div>
+                                                            <p className="text-xs text-gray-500 mb-1">
+                                                                {coupon.discountType === 'percentage' ? `${coupon.value}% OFF` : `$${coupon.value} OFF`}
+                                                            </p>
+                                                            <div className="text-xs font-medium text-orange-600 flex items-center gap-1">
+                                                                <span>Add ${needed.toFixed(2)} more</span>
+                                                                <Link href="/products" className="underline hover:text-orange-800">
+                                                                    Shop
+                                                                </Link>
                                                             </div>
-                                                        );
-                                                    })}
-                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
                                         </div>
-                                    )}
-                                </div>
-                            )}
+                                    </div>
+                                )}
+                            </div>
 
                             {discount > 0 && (
                                 <div className="flex justify-between text-green-600 font-medium">
