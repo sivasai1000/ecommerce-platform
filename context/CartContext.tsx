@@ -87,35 +87,85 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const [couponCode, setCouponCode] = useState("");
     const [discount, setDiscount] = useState(0);
     const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+    const [couponDetails, setCouponDetails] = useState<{ code: string, discountType: string, value: number, minOrderValue: number } | null>(null);
+
+    // Load Coupon from Storage
+    useEffect(() => {
+        const storageKey = user ? `coupon_${user.id}` : "coupon_guest";
+        const storedCoupon = localStorage.getItem(storageKey);
+        if (storedCoupon) {
+            const details = JSON.parse(storedCoupon);
+            setCouponDetails(details);
+            setAppliedCoupon(details.code);
+            setCouponCode(details.code);
+        } else {
+            setCouponDetails(null);
+            setAppliedCoupon(null);
+            setCouponCode("");
+            setDiscount(0);
+        }
+    }, [user]);
+
+    // Save Coupon to Storage
+    useEffect(() => {
+        const storageKey = user ? `coupon_${user.id}` : "coupon_guest";
+        if (couponDetails) {
+            localStorage.setItem(storageKey, JSON.stringify(couponDetails));
+        } else {
+            localStorage.removeItem(storageKey);
+        }
+    }, [couponDetails, user]);
+
+    // Calculate Discount & Strict Validation
+    useEffect(() => {
+        if (!couponDetails) {
+            setDiscount(0);
+            return;
+        }
+
+        // Strict Validation: Remove if total drops below minOrderValue
+        if (couponDetails.minOrderValue > 0 && cartTotal < couponDetails.minOrderValue) {
+            toast.error(`Coupon ${couponDetails.code} removed. Min order $${couponDetails.minOrderValue} not met.`);
+            removeCoupon();
+            return;
+        }
+
+        let disc = 0;
+        if (couponDetails.discountType === 'percentage') {
+            disc = (cartTotal * couponDetails.value) / 100;
+        } else {
+            disc = Number(couponDetails.value);
+        }
+
+        if (disc > cartTotal) disc = cartTotal;
+        setDiscount(disc);
+
+    }, [cartTotal, couponDetails]);
 
     const applyCoupon = async (code: string) => {
         try {
+            // Pass cartTotal for validation on server side too
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/coupons/validate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ code })
+                body: JSON.stringify({ code, cartTotal })
             });
             const data = await res.json();
-            if (res.ok) {
-                let disc = 0;
-                // Calculate discount based on current cartTotal
-                if (data.discountType === 'percentage') {
-                    disc = (cartTotal * data.value) / 100;
-                } else {
-                    disc = Number(data.value);
-                }
-                // Cap discount
-                if (disc > cartTotal) disc = cartTotal;
 
-                setDiscount(disc);
+            if (res.ok) {
+                const details = {
+                    code: data.code,
+                    discountType: data.discountType,
+                    value: Number(data.value),
+                    minOrderValue: Number(data.minOrderValue || 0)
+                };
+                setCouponDetails(details);
                 setAppliedCoupon(data.code);
-                setCouponCode(code); // Keep input in sync
+                setCouponCode(code);
                 toast.success(`Coupon ${data.code} applied!`);
                 return true;
             } else {
                 toast.error(data.message || "Invalid Coupon");
-                setDiscount(0);
-                setAppliedCoupon(null);
                 return false;
             }
         } catch (e) {
@@ -129,65 +179,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setDiscount(0);
         setAppliedCoupon(null);
         setCouponCode("");
-    };
-
-    // Recalculate discount if cartTotal changes (e.g. quantity update)
-    // We would need to store the coupon details (type/value) to do this accurately without re-fetching.
-    // For simplicity, let's just reset discount if cart changes significantly or just keep fixed value?
-    // Better: Store coupon details.
-
-    // Store simple coupon details to re-calculate
-    const [couponDetails, setCouponDetails] = useState<{ type: string, value: number } | null>(null);
-
-    useEffect(() => {
-        if (couponDetails && appliedCoupon) {
-            let disc = 0;
-            if (couponDetails.type === 'percentage') {
-                disc = (cartTotal * couponDetails.value) / 100;
-            } else {
-                disc = couponDetails.value;
-            }
-            if (disc > cartTotal) disc = cartTotal;
-            setDiscount(disc);
-        }
-    }, [cartTotal, couponDetails, appliedCoupon]);
-
-    // Enhanced applyCoupon to store details
-    const applyCouponEnhanced = async (code: string) => {
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/coupons/validate`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ code })
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setCouponDetails({ type: data.discountType, value: Number(data.value) });
-                setAppliedCoupon(data.code);
-                setCouponCode(code);
-                toast.success(`Coupon ${data.code} applied!`);
-                return true;
-            } else {
-                toast.error(data.message || "Invalid Coupon");
-                setDiscount(0);
-                setAppliedCoupon(null);
-                setCouponDetails(null);
-                return false;
-            }
-        } catch (e) {
-            console.error(e);
-            toast.error("Failed to apply coupon");
-            return false;
-        }
-    }
-
-    const removeCouponEnhanced = () => {
-        setDiscount(0);
-        setAppliedCoupon(null);
-        setCouponCode("");
         setCouponDetails(null);
+        const storageKey = user ? `coupon_${user.id}` : "coupon_guest";
+        localStorage.removeItem(storageKey);
     };
-
 
     return (
         <CartContext.Provider
@@ -200,11 +195,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 cartCount,
                 cartTotal,
                 couponCode,
-                setCouponCode, // Expose setter for inputs
+                setCouponCode,
                 discount,
                 appliedCoupon,
-                applyCoupon: applyCouponEnhanced,
-                removeCoupon: removeCouponEnhanced
+                applyCoupon,
+                removeCoupon
             }}
         >
             {children}
