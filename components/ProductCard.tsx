@@ -18,6 +18,7 @@ interface Product {
     category: string;
     subcategory?: string;
     discount?: number;
+    stock: number;
 }
 
 interface ProductCardProps {
@@ -33,6 +34,9 @@ export default function ProductCard({ product }: ProductCardProps) {
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault(); // Prevent link navigation if wrapped
         e.stopPropagation();
+
+        if (product.stock === 0) return;
+
         addToCart({
             id: product.id,
             name: product.name,
@@ -69,9 +73,16 @@ export default function ProductCard({ product }: ProductCardProps) {
                     <img
                         src={product.imageUrl || "/placeholder-image.png"}
                         alt={product.name}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${product.stock === 0 ? "opacity-50 grayscale" : ""}`}
                         onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300?text=No+Image'; }}
                     />
+                    {product.stock === 0 && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                            <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                Out of Stock
+                            </span>
+                        </div>
+                    )}
                 </Link>
 
                 {/* Wishlist Button */}
@@ -85,14 +96,16 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </button>
 
                 {/* Quick Add Button - Floating Overlay */}
-                <div className="absolute inset-x-4 bottom-4 z-20 translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                    <Button
-                        className="w-full bg-white text-stone-900 hover:bg-stone-50 shadow-lg font-bold tracking-wide uppercase text-xs h-10 rounded-lg transform active:scale-95 transition-all"
-                        onClick={isAddedToCart ? () => window.location.href = '/cart' : handleAddToCart}
-                    >
-                        {isAddedToCart ? "View Cart" : "Add to Cart"}
-                    </Button>
-                </div>
+                {product.stock > 0 && (
+                    <div className="absolute inset-x-4 bottom-4 z-20 translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                        <Button
+                            className="w-full bg-white text-stone-900 hover:bg-stone-50 shadow-lg font-bold tracking-wide uppercase text-xs h-10 rounded-lg transform active:scale-95 transition-all"
+                            onClick={isAddedToCart ? () => window.location.href = '/cart' : handleAddToCart}
+                        >
+                            {isAddedToCart ? "View Cart" : "Add to Cart"}
+                        </Button>
+                    </div>
+                )}
             </div>
 
             {/* Product Details */}
