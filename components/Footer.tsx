@@ -3,7 +3,35 @@
 import Link from "next/link";
 import { Facebook, Instagram, Twitter, Mail, MapPin, Phone } from "lucide-react";
 
+import { useEffect, useState } from "react";
+
 export default function Footer() {
+    const [contactInfo, setContactInfo] = useState({
+        address: "123 Fashion Ave, New York, NY 10001",
+        phone: "+1 (555) 123-4567",
+        email: "support@funstore.com"
+    });
+
+    useEffect(() => {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data && data.content) {
+                    try {
+                        const parsed = JSON.parse(data.content);
+                        setContactInfo({
+                            address: parsed.address || "123 Fashion Ave, New York, NY 10001",
+                            phone: parsed.phone || "+1 (555) 123-4567",
+                            email: parsed.email || "support@funstore.com"
+                        });
+                    } catch (e) {
+                        // Content is not JSON, potentially legacy HTML, ignore dynamic update for footer fields
+                    }
+                }
+            })
+            .catch(err => console.error("Failed to fetch contact info for footer", err));
+    }, []);
+
     return (
         <footer className="bg-stone-100 dark:bg-stone-950 text-stone-600 dark:text-stone-400 py-16 border-t border-stone-200 dark:border-stone-800">
             <div className="w-full max-w-[1400px] mx-auto px-6">
@@ -58,15 +86,15 @@ export default function Footer() {
                         <ul className="space-y-3 text-sm">
                             <li className="flex items-start space-x-3">
                                 <MapPin className="w-5 h-5 shrink-0" />
-                                <span>123 Fashion Ave, New York, NY 10001</span>
+                                <span className="whitespace-pre-wrap">{contactInfo.address}</span>
                             </li>
                             <li className="flex items-center space-x-3">
                                 <Phone className="w-5 h-5 shrink-0" />
-                                <span>+1 (555) 123-4567</span>
+                                <span>{contactInfo.phone}</span>
                             </li>
                             <li className="flex items-center space-x-3">
                                 <Mail className="w-5 h-5 shrink-0" />
-                                <span>support@funstore.com</span>
+                                <span>{contactInfo.email}</span>
                             </li>
                         </ul>
                     </div>
