@@ -2,6 +2,7 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ChatWidget from "@/components/ChatWidget";
 
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
@@ -21,6 +22,7 @@ export default function ClientLayout({
                     <Navbar />
                     <main className="flex-1">{children}</main>
                     <Footer />
+                    <ChatWidget />
                     <Toaster />
                 </WishlistProvider>
             </CartProvider>
