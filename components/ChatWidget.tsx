@@ -58,12 +58,32 @@ export default function ChatWidget() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    const handleSendMessage = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!newMessage.trim() || !token) return;
+    const quickOptions = [
+        "Track Order",
+        "Shipping Info",
+        "Returns",
+        "Talk to Human"
+    ];
 
-        const tempMessage = newMessage;
-        setNewMessage(""); // Optimistic clear
+    const handleSendMessage = async (e?: React.FormEvent, msgOverride?: string) => {
+        e?.preventDefault();
+        const msgToSend = msgOverride || newMessage;
+
+        if (!msgToSend.trim() || !token) return;
+
+        if (!msgOverride) setNewMessage(""); // Clear input if typed
+
+        // Optimistic UI update for USER message
+        const tempId = Date.now();
+        const optimisticMsg: Message = {
+            id: tempId,
+            sender_id: user?.id || 0,
+            receiver_id: null,
+            message: msgToSend,
+            is_admin_sender: false,
+            created_at: new Date().toISOString()
+        };
+        setMessages(prev => [...prev, optimisticMsg]);
 
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat/send`, {
@@ -72,19 +92,30 @@ export default function ChatWidget() {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ message: tempMessage }),
+                body: JSON.stringify({ message: msgToSend }),
             });
 
+            const data = await res.json();
+
             if (res.ok) {
-                await fetchMessages(); // Refresh messages
+                // If bot replied, add it
+                if (data.data.botReply) {
+                    const botMsg: Message = {
+                        id: tempId + 1,
+                        sender_id: 0, // System
+                        receiver_id: user?.id || 0,
+                        message: data.data.botReply.message,
+                        is_admin_sender: true,
+                        created_at: new Date().toISOString()
+                    };
+                    setMessages(prev => [...prev, botMsg]);
+                }
             } else {
                 toast.error("Failed to send message");
-                setNewMessage(tempMessage); // Restore on failure
             }
         } catch (error) {
             console.error(error);
             toast.error("Error sending message");
-            setNewMessage(tempMessage);
         }
     };
 
@@ -105,7 +136,21 @@ export default function ChatWidget() {
                     {/* Messages */}
                     <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-stone-50 dark:bg-stone-950">
                         {messages.length === 0 && (
-                            <p className="text-center text-stone-400 text-sm mt-10">Any questions? We are here to help!</p>
+                            <div className="text-center mt-4">
+                                <p className="text-stone-400 text-sm mb-4">How can we help you today?</p>
+                                <div className="flex flex-col gap-2">
+                                    {quickOptions.map(opt => (
+                                        <Button
+                                            key={opt}
+                                            variant="outline"
+                                            className="w-full justify-start text-xs h-9"
+                                            onClick={() => handleSendMessage(undefined, opt)}
+                                        >
+                                            {opt}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
                         )}
                         {messages.map((msg) => {
                             // If is_admin_sender is true, it's incoming (left). 
@@ -135,6 +180,9 @@ export default function ChatWidget() {
                                 </div>
                             );
                         })}
+
+                        {/* Always show options at bottom if chat is active but we want to prompt (Optional, removing for now to keep clean) */}
+
                         <div ref={messagesEndRef} />
                     </div>
 
