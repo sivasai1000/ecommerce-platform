@@ -66,10 +66,8 @@ export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen font-sans">
 
-      {/* Hero Section */}
-      <HeroSection banners={banners} />
 
-      {/* Features Banner */}
+      <HeroSection banners={banners} />
       <section className="border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 py-8">
         <div className="w-full max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-6">
           <div className="flex items-center justify-center gap-4">

@@ -1,13 +1,12 @@
-"use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import ProductCard from "@/components/ProductCard";
-import Link from "next/link"; // Ensure Link is imported if needed, usually Next.js uses standard imports
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Filter } from "lucide-react";
 import FilterSidebar from "@/components/FilterSidebar";
+import type { Metadata, ResolvingMetadata } from 'next';
 
 interface Product {
     id: number;
@@ -19,50 +18,55 @@ interface Product {
     stock: number;
 }
 
-function ProductsList() {
-    const searchParams = useSearchParams();
-    const categoryFilter = searchParams.get("category");
-    const subcategoryFilter = searchParams.get("subcategory");
-    const searchQuery = searchParams.get("q");
-    const minPrice = searchParams.get("minPrice");
-    const maxPrice = searchParams.get("maxPrice");
 
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+interface ProductsPageProps {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            setLoading(true);
-            try {
-                const params = new URLSearchParams();
-                if (categoryFilter) params.append("category", categoryFilter);
-                if (subcategoryFilter) params.append("subcategory", subcategoryFilter);
-                if (minPrice) params.append("minPrice", minPrice);
-                if (maxPrice) params.append("maxPrice", maxPrice);
-                if (searchQuery) params.append("search", searchQuery);
+// Dynamic Metadata
+export async function generateMetadata(
+    { searchParams }: ProductsPageProps,
+    parent: ResolvingMetadata
+): Promise<Metadata> {
+    const resolvedParams = await searchParams;
+    const category = resolvedParams.category as string;
+    const title = category ? `${category} Products | Store` : 'All Products | Store';
+    return {
+        title: title,
+        description: `Browse our collection of ${category || 'premium'} products.`,
+    };
+}
 
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products?${params.toString()}`);
-                if (!response.ok) {
-                    throw new Error("Failed to fetch products");
-                }
-                const data = await response.json();
-                setProducts(data);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : "An error occurred");
-            } finally {
-                setLoading(false);
-            }
-        };
+async function getProducts(searchParams: any) {
+    const params = new URLSearchParams();
+    if (searchParams.category) params.append("category", searchParams.category);
+    if (searchParams.subcategory) params.append("subcategory", searchParams.subcategory);
+    if (searchParams.minPrice) params.append("minPrice", searchParams.minPrice);
+    if (searchParams.maxPrice) params.append("maxPrice", searchParams.maxPrice);
+    if (searchParams.q) params.append("search", searchParams.q); // Note: 'q' mapped to 'search' from original
 
-        fetchProducts();
-    }, [categoryFilter, subcategoryFilter, minPrice, maxPrice, searchQuery]);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    try {
+        const response = await fetch(`${apiUrl}/api/products?${params.toString()}`, {
+            cache: 'no-store', // Ensure fresh data, or use 'force-cache' / revalidate for static
+        });
+        if (!response.ok) {
+            throw new Error("Failed to fetch products");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        return [];
+    }
+}
 
-    const activeFilterCount = [categoryFilter, subcategoryFilter, minPrice, maxPrice].filter(Boolean).length;
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+    const resolvedSearchParams = await searchParams;
+    const products: Product[] = await getProducts(resolvedSearchParams);
 
-
-
-    // ... existing code ...
+    // Derived state
+    const categoryFilter = resolvedSearchParams.category as string;
+    const activeFilterCount = Object.keys(resolvedSearchParams).length;
 
     return (
         <div className="flex flex-col min-h-screen bg-neutral-50 dark:bg-neutral-950">
@@ -118,18 +122,7 @@ function ProductsList() {
                             {/* Sort Component could go here */}
                         </div>
 
-                        {loading ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {[1, 2, 3, 4, 5, 6].map((n) => (
-                                    <div key={n} className="h-[400px] w-full bg-neutral-200 dark:bg-neutral-800 animate-pulse rounded-lg" />
-                                ))}
-                            </div>
-                        ) : error ? (
-                            <div className="text-center py-20 text-red-500">
-                                <p>Error loading products.</p>
-                                <Button variant="outline" onClick={() => window.location.reload()} className="mt-4">Retry</Button>
-                            </div>
-                        ) : products.length > 0 ? (
+                        {products.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                                 {products.map((product) => (
                                     <ProductCard key={product.id} product={{ ...product, price: Number(product.price) }} />
@@ -142,7 +135,9 @@ function ProductsList() {
                                     Try adjusting your filters or search query to find what you're looking for.
                                 </p>
                                 {activeFilterCount > 0 && (
-                                    <Button variant="link" onClick={() => window.location.href = '/products'}>Clear Filters</Button>
+                                    <Link href="/products" className="mt-4 inline-block text-sm text-blue-600 hover:underline">
+                                        Clear Filters
+                                    </Link>
                                 )}
                             </div>
                         )}
@@ -150,14 +145,5 @@ function ProductsList() {
                 </div>
             </div>
         </div>
-    );
-
-}
-
-export default function ProductsPage() {
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <ProductsList />
-        </Suspense>
     );
 }

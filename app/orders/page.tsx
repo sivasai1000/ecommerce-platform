@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 interface OrderItem {
     id: number;
@@ -33,6 +34,7 @@ interface Order {
 export default function OrdersPage() {
     // ... state ...
     const { token, isAuthenticated } = useAuth();
+    const { contactInfo } = useContactInfo();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -40,6 +42,17 @@ export default function OrdersPage() {
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState("");
     const [submitting, setSubmitting] = useState(false);
+
+    const handleOrderHelp = (orderId: number, productName: string) => {
+        if (!contactInfo.phone) {
+            toast.error("Contact info not available");
+            return;
+        }
+        const message = `Hi, I have a query regarding Order #${orderId}, Product: ${productName}.`;
+        const phoneNumber = contactInfo.phone.replace(/[^0-9]/g, '');
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    };
 
     // ... useEffect ...
     useEffect(() => {
@@ -184,15 +197,26 @@ export default function OrdersPage() {
                                                         ₹{(Number(item.price) * item.quantity).toFixed(2)}
                                                     </div>
                                                     {order.status === 'completed' && (
-                                                        item.isReviewed ? (
-                                                            <Button variant="secondary" size="sm" disabled>
-                                                                Review Submitted
+                                                        <div className="flex flex-col gap-2 mt-2 items-end">
+                                                            {item.isReviewed ? (
+                                                                <Button variant="secondary" size="sm" disabled>
+                                                                    Review Submitted
+                                                                </Button>
+                                                            ) : reviewingItemId !== item.id && (
+                                                                <Button variant="outline" size="sm" onClick={() => handleStartReview(item.id)}>
+                                                                    Write a Review
+                                                                </Button>
+                                                            )}
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                onClick={() => handleOrderHelp(order.id, item.Product?.name || 'Product')}
+                                                            >
+                                                                <MessageCircle className="h-4 w-4 mr-1" />
+                                                                Help
                                                             </Button>
-                                                        ) : reviewingItemId !== item.id && (
-                                                            <Button variant="outline" size="sm" onClick={() => handleStartReview(item.id)}>
-                                                                Write a Review
-                                                            </Button>
-                                                        )
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
