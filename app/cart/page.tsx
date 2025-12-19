@@ -18,17 +18,18 @@ export default function CartPage() {
     const { contactInfo } = useContactInfo();
     const router = useRouter();
 
-    const handleCartEnquiry = (productName?: string) => {
+    const handleCartEnquiry = (productName?: string, productId?: number) => {
         if (!contactInfo.phone) {
             toast.error("Contact info not available");
             return;
         }
 
         let message = "Hi, I need help with my cart.";
-        if (productName) {
-            message = `Hi, I have a question about *${productName}* in my cart.`;
+        if (productName && productId) {
+            const productUrl = `${window.location.origin}/product/${productId}`;
+            message = `Hi, I have a question about *${productName}* in my cart.\n\nLink: ${productUrl}`;
         } else if (cartItems.length > 0) {
-            message = `Hi, I need help with my cart containing ${cartItems.length} items. Total: ${cartTotal.toFixed(2)}`;
+            message = `Hi, I need help with my cart containing ${cartItems.length} items. Total: ₹${cartTotal.toFixed(2)}`;
         }
 
         const phoneNumber = contactInfo.phone.replace(/[^0-9]/g, '');
@@ -116,13 +117,13 @@ export default function CartPage() {
                                     </div>
                                     <div className="flex flex-col items-end gap-2">
                                         <p className="font-bold">
-                                            ${(item.price * item.quantity).toFixed(2)}
+                                            ₹{(item.price * item.quantity).toFixed(2)}
                                         </p>
                                         <div className="flex items-center gap-1">
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                onClick={() => handleCartEnquiry(item.name)}
+                                                onClick={() => handleCartEnquiry(item.name, item.id)}
                                                 className="text-green-600 hover:bg-green-50"
                                                 title="Ask about this item"
                                             >
@@ -237,20 +238,20 @@ export default function CartPage() {
                             {discount > 0 && (
                                 <div className="flex justify-between text-green-600 font-medium">
                                     <span>Discount ({appliedCoupon})</span>
-                                    <span>-${discount.toFixed(2)}</span>
+                                    <span>-₹{discount.toFixed(2)}</span>
                                 </div>
                             )}
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Subtotal</span>
-                                <span>${cartTotal.toFixed(2)}</span>
+                                <span>₹{cartTotal.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Tax (10%)</span>
-                                <span>${taxableAmount ? (taxableAmount * 0.1).toFixed(2) : '0.00'}</span>
+                                <span>₹{taxableAmount ? (taxableAmount * 0.1).toFixed(2) : '0.00'}</span>
                             </div>
                             <div className="border-t pt-4 flex justify-between font-bold text-lg">
                                 <span>Total</span>
-                                <span>${total.toFixed(2)}</span>
+                                <span>₹{total.toFixed(2)}</span>
                             </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-3">

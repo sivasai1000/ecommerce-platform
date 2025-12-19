@@ -126,15 +126,15 @@ export default function ProductCard({ product }: ProductCardProps) {
                         {product.discount && product.discount > 0 ? (
                             <div className="text-right">
                                 <span className="block font-bold text-sm text-stone-900 dark:text-stone-50">
-                                    ${Number(product.price).toFixed(2)}
+                                    ₹{Number(product.price).toFixed(2)}
                                 </span>
                                 <span className="block text-[10px] text-muted-foreground line-through">
-                                    ${Number(product.mrp || (Number(product.price) / (1 - product.discount / 100))).toFixed(2)}
+                                    ₹{Number(product.mrp || (Number(product.price) / (1 - product.discount / 100))).toFixed(2)}
                                 </span>
                             </div>
                         ) : (
                             <span className="font-bold text-sm text-stone-900 dark:text-stone-50">
-                                ${Number(product.price).toFixed(2)}
+                                ₹{Number(product.price).toFixed(2)}
                             </span>
                         )}
                     </div>

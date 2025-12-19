@@ -74,7 +74,7 @@ export default async function Home() {
             <div className="p-3 bg-stone-100 dark:bg-stone-900 rounded-full"><Truck className="w-5 h-5 text-stone-600" /></div>
             <div className="text-left">
               <h3 className="font-bold text-sm uppercase tracking-wider">Free Shipping</h3>
-              <p className="text-xs text-stone-500">On all orders over $200</p>
+              <p className="text-xs text-stone-500">On all orders over ₹200</p>
             </div>
           </div>
           <div className="flex items-center justify-center gap-4">

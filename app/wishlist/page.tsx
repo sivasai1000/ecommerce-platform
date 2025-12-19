@@ -67,7 +67,7 @@ export default function WishlistPage() {
                                         </Link>
                                     </h3>
                                     <p className="text-sm text-muted-foreground mb-2">{item.category}</p>
-                                    <p className="font-bold text-lg mb-4">${item.price}</p>
+                                    <p className="font-bold text-lg mb-4">₹{item.price}</p>
 
                                     <div className="flex gap-2">
                                         {item.stock > 0 ? (

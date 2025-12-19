@@ -219,7 +219,7 @@ export default function CheckoutPage() {
                         {cartItems.map((item) => (
                             <div key={item.id} className="flex justify-between text-sm">
                                 <span>{item.name} (x{item.quantity})</span>
-                                <span>${(item.price * item.quantity).toFixed(2)}</span>
+                                <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                             </div>
                         ))}
 
@@ -247,21 +247,21 @@ export default function CheckoutPage() {
                         <div className="border-t pt-4 space-y-1.5 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Subtotal</span>
-                                <span>${cartTotal.toFixed(2)}</span>
+                                <span>₹{cartTotal.toFixed(2)}</span>
                             </div>
                             {discount > 0 && (
                                 <div className="flex justify-between text-green-600">
                                     <span>Discount ({appliedCoupon})</span>
-                                    <span>-${discount.toFixed(2)}</span>
+                                    <span>-₹{discount.toFixed(2)}</span>
                                 </div>
                             )}
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Tax (10%)</span>
-                                <span>${(taxableAmount * 0.1).toFixed(2)}</span>
+                                <span>₹{(taxableAmount * 0.1).toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between font-bold text-lg pt-2 border-t">
                                 <span>Total</span>
-                                <span>${finalTotal.toFixed(2)}</span>
+                                <span>₹{finalTotal.toFixed(2)}</span>
                             </div>
                         </div>
 
