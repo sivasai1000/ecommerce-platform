@@ -9,11 +9,32 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useContactInfo } from "@/hooks/useContactInfo";
+import { MessageCircle } from "lucide-react";
 
 export default function CartPage() {
     const { cartItems, removeFromCart, updateQuantity, cartTotal, couponCode, setCouponCode, applyCoupon, removeCoupon, appliedCoupon, discount } = useCart();
     const { isAuthenticated } = useAuth();
+    const { contactInfo } = useContactInfo();
     const router = useRouter();
+
+    const handleCartEnquiry = (productName?: string) => {
+        if (!contactInfo.phone) {
+            toast.error("Contact info not available");
+            return;
+        }
+
+        let message = "Hi, I need help with my cart.";
+        if (productName) {
+            message = `Hi, I have a question about *${productName}* in my cart.`;
+        } else if (cartItems.length > 0) {
+            message = `Hi, I need help with my cart containing ${cartItems.length} items. Total: ${cartTotal.toFixed(2)}`;
+        }
+
+        const phoneNumber = contactInfo.phone.replace(/[^0-9]/g, '');
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    };
 
     // Coupons Logic
     const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
@@ -97,14 +118,25 @@ export default function CartPage() {
                                         <p className="font-bold">
                                             ${(item.price * item.quantity).toFixed(2)}
                                         </p>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => removeFromCart(item.id)}
-                                            className="text-destructive hover:bg-destructive/10"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                        <div className="flex items-center gap-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleCartEnquiry(item.name)}
+                                                className="text-green-600 hover:bg-green-50"
+                                                title="Ask about this item"
+                                            >
+                                                <MessageCircle className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => removeFromCart(item.id)}
+                                                className="text-destructive hover:bg-destructive/10"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -221,7 +253,7 @@ export default function CartPage() {
                                 <span>${total.toFixed(2)}</span>
                             </div>
                         </CardContent>
-                        <CardFooter>
+                        <CardFooter className="flex flex-col gap-3">
                             <Button
                                 className="w-full"
                                 size="lg"
@@ -229,6 +261,16 @@ export default function CartPage() {
                                 disabled={cartItems.length === 0}
                             >
                                 Proceed to Checkout
+                            </Button>
+                            <Button
+                                className="w-full border-green-600 text-green-600 hover:bg-green-50 hover:text-green-700"
+                                variant="outline"
+                                size="lg"
+                                onClick={() => handleCartEnquiry()}
+                                disabled={cartItems.length === 0}
+                            >
+                                <MessageCircle className="mr-2 h-4 w-4" />
+                                Need Help?
                             </Button>
                         </CardFooter>
                     </Card>
