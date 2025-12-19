@@ -70,7 +70,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <Card className="group relative flex flex-col space-y-3 bg-transparent border-0 shadow-none rounded-none overflow-visible p-0 gap-0">
             {/* Image Container */}
             <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl bg-stone-100 dark:bg-stone-800">
-                <Link href={`/product/${encodeURIComponent(product.name)}`} className="block h-full w-full">
+                <Link href={`/product/${encodeURIComponent(product.name.replace(/\s+/g, '-'))}`} className="block h-full w-full">
                     <img
                         src={product.imageUrl || "/placeholder-image.png"}
                         alt={product.name}
@@ -117,7 +117,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                             {product.category}
                         </p>
                         <h3 className="text-base font-medium leading-tight text-stone-900 dark:text-stone-50 truncate group-hover:underline decoration-stone-400 underline-offset-4">
-                            <Link href={`/product/${encodeURIComponent(product.name)}`}>
+                            <Link href={`/product/${encodeURIComponent(product.name.replace(/\s+/g, '-'))}`}>
                                 {product.name}
                             </Link>
                         </h3>

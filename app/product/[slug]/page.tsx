@@ -9,7 +9,7 @@ interface Props {
 async function fetchProduct(slug: string) {
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-        const decodedName = decodeURIComponent(slug);
+        const decodedName = decodeURIComponent(slug).replace(/-/g, ' ');
         const res = await fetch(`${apiUrl}/api/products/name/${encodeURIComponent(decodedName)}`, {
             cache: 'no-store',
         });
