@@ -48,7 +48,8 @@ export default function OrdersPage() {
             toast.error("Contact info not available");
             return;
         }
-        const message = `Hi, I have a query regarding Order #${orderId}, Product: ${productName}.`;
+        const productUrl = `${window.location.origin}/product/${encodeURIComponent(productName)}`;
+        const message = `Hi, I have a query regarding Order #${orderId}, Product: *${productName}*.\n\nLink: ${productUrl}`;
         const phoneNumber = contactInfo.phone.replace(/[^0-9]/g, '');
         const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');

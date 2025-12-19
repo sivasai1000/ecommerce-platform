@@ -26,7 +26,7 @@ export default function CartPage() {
 
         let message = "Hi, I need help with my cart.";
         if (productName && productId) {
-            const productUrl = `${window.location.origin}/product/${productId}`;
+            const productUrl = `${window.location.origin}/product/${encodeURIComponent(productName)}`;
             message = `Hi, I have a question about *${productName}* in my cart.\n\nLink: ${productUrl}`;
         } else if (cartItems.length > 0) {
             message = `Hi, I need help with my cart containing ${cartItems.length} items. Total: ₹${cartTotal.toFixed(2)}`;

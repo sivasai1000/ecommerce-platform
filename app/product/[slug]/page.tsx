@@ -3,25 +3,32 @@ import ProductClient from './ProductClient';
 import { notFound } from 'next/navigation';
 
 interface Props {
-    params: Promise<{ id: string }>;
+    params: Promise<{ slug: string }>;
 }
 
-async function fetchProduct(id: string) {
+async function fetchProduct(slug: string) {
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`, {
-            cache: 'no-store' // Ensure fresh data
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const decodedName = decodeURIComponent(slug);
+        const res = await fetch(`${apiUrl}/api/products/name/${encodeURIComponent(decodedName)}`, {
+            cache: 'no-store',
         });
-        if (!res.ok) return null;
+
+        if (!res.ok) {
+            if (res.status === 404) return null;
+            throw new Error('Failed to fetch product');
+        }
+
         return res.json();
     } catch (error) {
-        console.error("Error fetching product", error);
+        console.error('Error fetching product:', error);
         return null;
     }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const { id } = await params;
-    const product = await fetchProduct(id);
+    const { slug } = await params;
+    const product = await fetchProduct(slug);
 
     if (!product) {
         return {
@@ -31,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     return {
         title: product.name,
-        description: product.description.substring(0, 160), // Limit description for SEO
+        description: `Buy now for ₹${product.price} - ${product.description.substring(0, 100)}...`,
         openGraph: {
             title: product.name,
             description: `Buy now for ₹${product.price} - ${product.description.substring(0, 100)}...`,
@@ -49,11 +56,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProductPage({ params }: Props) {
-    const { id } = await params;
-    const product = await fetchProduct(id);
+    const { slug } = await params;
+    const product = await fetchProduct(slug);
 
     if (!product) {
-        notFound(); // Triggers the default 404 page
+        notFound();
     }
 
     return <ProductClient product={product} />;

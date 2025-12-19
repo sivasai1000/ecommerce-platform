@@ -42,7 +42,7 @@ export default function WishlistPage() {
                         return (
                             <Card key={item.id} className="overflow-hidden">
                                 <div className="aspect-square relative overflow-hidden bg-gray-100">
-                                    <Link href={`/product/${item.id}`} className="block h-full w-full">
+                                    <Link href={`/product/${encodeURIComponent(item.name)}`} className="block h-full w-full">
                                         <img
                                             src={imageSrc}
                                             alt={item.name}
@@ -62,7 +62,7 @@ export default function WishlistPage() {
                                 </div>
                                 <CardContent className="p-4">
                                     <h3 className="font-semibold line-clamp-1">
-                                        <Link href={`/product/${item.id}`} className="hover:underline">
+                                        <Link href={`/product/${encodeURIComponent(item.name)}`} className="hover:underline">
                                             {item.name}
                                         </Link>
                                     </h3>
