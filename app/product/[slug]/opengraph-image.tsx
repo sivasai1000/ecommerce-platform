@@ -59,6 +59,12 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         }
     } catch { }
 
+    // Ensure absolute URL for ImageResponse (Satori requires absolute URLs)
+    if (imageUrl && !imageUrl.startsWith('http')) {
+        const cleanPath = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
+        imageUrl = `${apiUrl}/${cleanPath}`;
+    }
+
     return new ImageResponse(
         (
             <div

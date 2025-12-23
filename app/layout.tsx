@@ -13,8 +13,15 @@ export const metadata: Metadata = {
   description: "A full-featured e-commerce platform",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   robots: {
-    index: false,
-    follow: false
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   }
 };
 
