@@ -55,16 +55,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         openGraph: {
             title: product.name,
             description: `Buy now for ₹${product.price} - ${product.description.substring(0, 100)}...`,
-            images: [
-                {
-                    url: imageUrl,
-                    width: 800,
-                    height: 600,
-                    alt: product.name,
-                },
-            ],
             type: 'website',
         },
+        twitter: {
+            card: 'summary_large_image',
+            title: product.name,
+            description: `Buy now for ₹${product.price} - ${product.description.substring(0, 100)}...`,
+        }
     };
 }
 
