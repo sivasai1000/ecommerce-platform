@@ -8,13 +8,15 @@ export default async function Footer() {
         email: "support@funstore.com"
     };
 
+    let categories = [];
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, {
-            next: { revalidate: 3600 } // Cache for 1 hour
-        });
+        const [contactRes, catRes] = await Promise.all([
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, { next: { revalidate: 3600 } }),
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/categories`, { next: { revalidate: 3600 } })
+        ]);
 
-        if (res.ok) {
-            const data = await res.json();
+        if (contactRes.ok) {
+            const data = await contactRes.json();
             if (data && data.content) {
                 try {
                     const parsed = JSON.parse(data.content);
@@ -23,13 +25,15 @@ export default async function Footer() {
                         phone: parsed.phone || contactInfo.phone,
                         email: parsed.email || contactInfo.email
                     };
-                } catch (e) {
-                    // Ignore JSON parse error, use defaults
-                }
+                } catch (e) { }
             }
         }
+
+        if (catRes.ok) {
+            categories = await catRes.json();
+        }
     } catch (err) {
-        console.error("Failed to fetch contact info for footer", err);
+        console.error("Failed to fetch footer data", err);
     }
 
     return (
@@ -62,8 +66,13 @@ export default async function Footer() {
                         <h4 className="font-bold text-stone-900 dark:text-stone-50 uppercase tracking-wider text-sm">Shop</h4>
                         <ul className="space-y-2 text-sm">
                             <li><Link href="/products" className="hover:text-stone-900 dark:hover:text-stone-50 transition-colors">New Arrivals</Link></li>
-                            <li><Link href="/products?category=Men" className="hover:text-stone-900 dark:hover:text-stone-50 transition-colors">Men</Link></li>
-                            <li><Link href="/products?category=Women" className="hover:text-stone-900 dark:hover:text-stone-50 transition-colors">Women</Link></li>
+                            {categories.slice(0, 2).map((cat: any) => (
+                                <li key={cat.name}>
+                                    <Link href={`/products?category=${encodeURIComponent(cat.name)}`} className="hover:text-stone-900 dark:hover:text-stone-50 transition-colors">
+                                        {cat.name}
+                                    </Link>
+                                </li>
+                            ))}
                             <li><Link href="/deals" className="hover:text-stone-900 dark:hover:text-stone-50 transition-colors">Sale</Link></li>
                         </ul>
                     </div>

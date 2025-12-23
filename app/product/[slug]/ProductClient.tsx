@@ -18,6 +18,7 @@ interface Product {
     mrp: number;
     discount: number;
     imageUrl: string;
+    images?: string[]; // Optional array of images
     category: string;
     stock: number;
     isFeatured: boolean;
@@ -44,6 +45,30 @@ export default function ProductClient({ product }: ProductClientProps) {
 
     const [reviews, setReviews] = useState<Review[]>([]);
     const [activeImage, setActiveImage] = useState(product.imageUrl);
+    const [allImages, setAllImages] = useState<string[]>([]);
+
+    useEffect(() => {
+        // Initialize images
+        let imagesList: string[] = [];
+        if (product.images && product.images.length > 0) {
+            imagesList = product.images;
+        } else if (product.imageUrl) {
+            // Try parsing JSON if stored as string
+            try {
+                if (product.imageUrl.startsWith('[') || product.imageUrl.startsWith('{')) {
+                    const parsed = JSON.parse(product.imageUrl);
+                    if (Array.isArray(parsed)) imagesList = parsed;
+                    else imagesList = [product.imageUrl];
+                } else {
+                    imagesList = [product.imageUrl];
+                }
+            } catch {
+                imagesList = [product.imageUrl];
+            }
+        }
+        setAllImages(imagesList);
+        setActiveImage(imagesList[0] || product.imageUrl);
+    }, [product]);
 
     useEffect(() => {
         fetchReviews();
@@ -109,15 +134,35 @@ export default function ProductClient({ product }: ProductClientProps) {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="grid md:grid-cols-2 gap-12 mb-16">
-                <div className="space-y-4">
-                    <div className="aspect-square bg-gray-100 rounded-2xl overflow-hidden relative">
-                        {product.imageUrl ? (
-                            <img src={activeImage} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+            <div className="grid md:grid-cols-[1.3fr_1fr] gap-12 mb-16">
+                <div className="flex flex-col md:flex-row gap-4">
+                    {/* Thumbnails */}
+                    {allImages.length > 1 && (
+                        <div className="order-2 md:order-1 grid grid-cols-4 md:flex md:flex-col gap-4 md:w-24 shrink-0">
+                            {allImages.map((img, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setActiveImage(img)}
+                                    className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${activeImage === img ? "border-black ring-1 ring-black/50" : "border-transparent hover:border-gray-300"}`}
+                                >
+                                    <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Main Image */}
+                    <div className="order-1 md:order-2 flex-1 aspect-[4/5] bg-gray-100 rounded-2xl overflow-hidden relative group">
+                        {activeImage ? (
+                            <img
+                                src={activeImage}
+                                alt={product.name}
+                                className="w-full h-full object-cover transition-transform duration-700 hover:scale-105 cursor-zoom-in"
+                            />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
                         )}
-                        {product.discount > 0 && <span className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">-{product.discount}%</span>}
+                        {product.discount > 0 && <span className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium z-10">-{product.discount}%</span>}
                     </div>
                 </div>
 

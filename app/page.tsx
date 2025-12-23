@@ -32,9 +32,10 @@ async function getData() {
   }
 
   try {
-    const [prodRes, bannerRes] = await Promise.all([
+    const [prodRes, bannerRes, catRes] = await Promise.all([
       fetch(`${apiUrl}/api/products?isFeatured=true`, { cache: 'no-store' }),
-      fetch(`${apiUrl}/api/banners`, { cache: 'no-store' })
+      fetch(`${apiUrl}/api/banners`, { cache: 'no-store' }),
+      fetch(`${apiUrl}/api/products/categories`, { cache: 'no-store' })
     ]);
 
     let featuredProducts: Product[] = [];
@@ -53,15 +54,45 @@ async function getData() {
       console.error("Failed to fetch banners:", bannerRes.statusText);
     }
 
-    return { featuredProducts, banners };
+    let categories: { name: string; image?: string }[] = [];
+    if (catRes.ok) {
+      categories = await catRes.json();
+    }
+
+    return { featuredProducts, banners, categories };
   } catch (error) {
     console.error("Failed to fetch data:", error);
-    return { featuredProducts: [], banners: [] };
+    return { featuredProducts: [], banners: [], categories: [] };
   }
 }
 
+const getCategoryImage = (categoryName: string, index: number) => {
+  const imageMap: { [key: string]: string } = {
+    "Electronics": "https://images.unsplash.com/photo-1498049860654-af1a5c5668ba?auto=format&fit=crop&q=80",
+    "Fashion": "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80",
+    "Home & Furniture": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80",
+    "Health & Beauty": "https://images.unsplash.com/photo-1596462502278-27bfdd403348?auto=format&fit=crop&q=80",
+    "Men's Wear": "https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?auto=format&fit=crop&q=80",
+    "Women's Wear": "https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?auto=format&fit=crop&q=80",
+    "Smartphones": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&q=80",
+    "Laptops": "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?auto=format&fit=crop&q=80"
+  };
+
+  if (imageMap[categoryName]) return imageMap[categoryName];
+
+  const images = [
+    "https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?auto=format&fit=crop&q=80", // Women
+    "https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?auto=format&fit=crop&q=80", // Men
+    "https://images.unsplash.com/photo-1590736939943-85b42d176711?auto=format&fit=crop&q=80", // Accessories
+    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80", // Shoes
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80", // Tech
+    "https://images.unsplash.com/photo-1610465299993-e6675c9f9efa?auto=format&fit=crop&q=80", // Laptop
+  ];
+  return images[index % images.length];
+};
+
 export default async function Home() {
-  const { featuredProducts, banners } = await getData();
+  const { featuredProducts, banners, categories = [] } = await getData();
 
   return (
     <div className="flex flex-col min-h-screen font-sans">
@@ -96,63 +127,55 @@ export default async function Home() {
 
       {/* Categories Grid */}
       <section className="py-20 bg-white dark:bg-stone-950">
-        <div className="container px-6">
+        <div className="w-full max-w-[1400px] mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl font-serif font-medium mb-4">Shop by Category</h2>
             <div className="h-1 w-20 bg-stone-900 dark:bg-stone-100 mx-auto" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 h-[600px] md:h-[500px]">
-            {/* Category 1 */}
-            <Link href="/products?category=Women" className="group relative overflow-hidden h-full lg:col-span-1 rounded-sm">
-              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?auto=format&fit=crop&q=80')] bg-cover bg-center transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white/90 dark:bg-black/80 px-8 py-4 backdrop-blur-sm">
-                  <h3 className="text-xl font-bold uppercase tracking-widest text-stone-900 dark:text-stone-50">Women</h3>
-                </div>
-              </div>
-            </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid-rows-2 auto-rows-[300px] gap-4 h-[600px]">
+            {categories.slice(0, 4).map((cat, index) => {
+              // Layout Logic:
+              // Index 0: Tall (Col 1, Row 1-2)
+              // Index 1: Tall (Col 2, Row 1-2)
+              // Index 2: Stacked (Col 3, Row 1)
+              // Index 3: Stacked (Col 3, Row 2)
+              let gridClass = "";
+              if (index === 0) gridClass = "lg:col-span-1 lg:row-span-2 md:col-span-1 md:row-span-2 h-full";
+              else if (index === 1) gridClass = "lg:col-span-1 lg:row-span-2 md:col-span-1 md:row-span-2 h-full";
+              else gridClass = "lg:col-span-1 lg:row-span-1 md:col-span-1 md:row-span-1 h-full";
 
-            {/* Category 2 (Large) */}
-            <Link href="/products?category=Men" className="group relative overflow-hidden h-full lg:col-span-1 rounded-sm">
-              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?auto=format&fit=crop&q=80')] bg-cover bg-center transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white/90 dark:bg-black/80 px-8 py-4 backdrop-blur-sm">
-                  <h3 className="text-xl font-bold uppercase tracking-widest text-stone-900 dark:text-stone-50">Men</h3>
-                </div>
-              </div>
-            </Link>
+              // Image Logic: Use dynamic category image from backend, fallback to map
+              const bgImage = cat.image || getCategoryImage(cat.name, index);
 
-            {/* Category 3 */}
-            <div className="flex flex-col gap-6 h-full lg:col-span-1">
-              <Link href="/products?category=Accessories" className="group relative flex-1 overflow-hidden rounded-sm">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1590736939943-85b42d176711?auto=format&fit=crop&q=80')] bg-cover bg-center transition-transform duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/90 dark:bg-black/80 px-6 py-3 backdrop-blur-sm">
-                    <h3 className="text-lg font-bold uppercase tracking-widest text-stone-900 dark:text-stone-50">Accessories</h3>
+              return (
+                <Link
+                  key={cat.name}
+                  href={`/products?category=${encodeURIComponent(cat.name)}`}
+                  className={`group relative overflow-hidden rounded-sm ${gridClass}`}
+                >
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                    style={{ backgroundImage: `url('${bgImage}')` }}
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-white/90 dark:bg-black/80 px-8 py-4 backdrop-blur-sm">
+                      <h3 className="text-xl font-bold uppercase tracking-widest text-stone-900 dark:text-stone-50">
+                        {cat.name}
+                      </h3>
+                    </div>
                   </div>
-                </div>
-              </Link>
-              <Link href="/products?category=Shoes" className="group relative flex-1 overflow-hidden rounded-sm">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80')] bg-cover bg-center transition-transform duration-700 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/90 dark:bg-black/80 px-6 py-3 backdrop-blur-sm">
-                    <h3 className="text-lg font-bold uppercase tracking-widest text-stone-900 dark:text-stone-50">Shoes</h3>
-                  </div>
-                </div>
-              </Link>
-            </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Featured Products -> New Arrivals */}
       <section className="py-20 bg-stone-50 dark:bg-stone-900/50">
-        <div className="container px-6">
+        <div className="w-full max-w-[1400px] mx-auto px-6">
           <div className="flex items-end justify-between mb-12">
             <div>
               <h2 className="text-3xl font-serif font-medium mb-2">New Arrivals</h2>

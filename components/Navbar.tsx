@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
     const { user, logout, isAuthenticated } = useAuth();
@@ -28,6 +28,22 @@ export default function Navbar() {
     const [searchQuery, setSearchQuery] = useState("");
     const [showMobileSearch, setShowMobileSearch] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [categories, setCategories] = useState<{ name: string }[]>([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/categories`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setCategories(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch categories:", error);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -60,8 +76,16 @@ export default function Navbar() {
                             </div>
                             <nav className="flex flex-col p-6 space-y-6">
                                 <Link href="/products" onClick={closeMobileMenu} className="text-lg font-medium uppercase tracking-wider hover:text-stone-500 transition-colors">Shop All</Link>
-                                <Link href="/products?category=Men" onClick={closeMobileMenu} className="text-lg font-medium uppercase tracking-wider hover:text-stone-500 transition-colors">Men</Link>
-                                <Link href="/products?category=Women" onClick={closeMobileMenu} className="text-lg font-medium uppercase tracking-wider hover:text-stone-500 transition-colors">Women</Link>
+                                {categories.map((cat) => (
+                                    <Link
+                                        key={cat.name}
+                                        href={`/products?category=${encodeURIComponent(cat.name)}`}
+                                        onClick={closeMobileMenu}
+                                        className="text-lg font-medium uppercase tracking-wider hover:text-stone-500 transition-colors"
+                                    >
+                                        {cat.name}
+                                    </Link>
+                                ))}
                                 <Link href="/about" onClick={closeMobileMenu} className="text-lg font-medium uppercase tracking-wider hover:text-stone-500 transition-colors">Our Story</Link>
                             </nav>
                         </div>
@@ -80,12 +104,15 @@ export default function Navbar() {
                     <Link href="/products" className="hover:text-stone-900 dark:hover:text-stone-50 transition-colors">
                         Shop
                     </Link>
-                    <Link href="/products?category=Men" className="hover:text-stone-900 dark:hover:text-stone-50 transition-colors">
-                        Men
-                    </Link>
-                    <Link href="/products?category=Women" className="hover:text-stone-900 dark:hover:text-stone-50 transition-colors">
-                        Women
-                    </Link>
+                    {categories.slice(0, 2).map((cat) => (
+                        <Link
+                            key={cat.name}
+                            href={`/products?category=${encodeURIComponent(cat.name)}`}
+                            className="hover:text-stone-900 dark:hover:text-stone-50 transition-colors"
+                        >
+                            {cat.name}
+                        </Link>
+                    ))}
                     <Link href="/blogs" className="hover:text-stone-900 dark:hover:text-stone-50 transition-colors">
                         Blogs
                     </Link>

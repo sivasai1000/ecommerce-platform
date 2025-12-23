@@ -84,7 +84,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 </div>
             </section>
 
-            <div className="container px-4 md:px-8 py-12">
+            <div className="w-full max-w-[1400px] mx-auto px-4 md:px-8 py-12">
                 <div className="flex flex-col lg:flex-row gap-10">
 
                     {/* Mobile Filter Button */}
