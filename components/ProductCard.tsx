@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { useWishlist } from "@/context/WishlistContext";
-import { Heart } from "lucide-react";
+import { Heart, MessageCircle } from "lucide-react";
+import { useContactInfo } from "@/hooks/useContactInfo";
 
 interface Product {
     id: number;
@@ -28,6 +29,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
     const { addToCart, cartItems } = useCart();
     const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+    const { contactInfo } = useContactInfo();
 
     const isAddedToCart = cartItems.some(item => item.id === product.id);
 
@@ -66,6 +68,21 @@ export default function ProductCard({ product }: ProductCardProps) {
         }
     };
 
+    const handleWhatsApp = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!contactInfo.phone) {
+            toast.error("Contact info not available");
+            return;
+        }
+
+        const message = `Hi, I am interested in *${product.name}*.\n\nPrice: ₹${product.price}\n\nLink: ${window.location.origin}/product/${encodeURIComponent(product.name.replace(/\s+/g, '-'))}`;
+        const phoneNumber = contactInfo.phone.replace(/[^0-9]/g, '');
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    };
+
     return (
         <Card className="group relative flex flex-col space-y-3 bg-transparent border-0 shadow-none rounded-none overflow-visible p-0 gap-0">
             {/* Image Container */}
@@ -86,15 +103,28 @@ export default function ProductCard({ product }: ProductCardProps) {
                     )}
                 </Link>
 
-                {/* Wishlist Button */}
-                <button
-                    onClick={toggleWishlist}
-                    className="absolute top-3 right-3 z-10 p-2.5 rounded-full bg-white/80 hover:bg-white text-stone-700 dark:text-stone-300 transition-all hover:scale-110"
-                >
-                    <Heart
-                        className={`h-4 w-4 ${isInWishlist(product.id) ? "fill-red-500 text-red-500" : "currentColor"}`}
-                    />
-                </button>
+                {/* Action Buttons Container */}
+                <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
+                    {/* Wishlist Button */}
+                    <button
+                        onClick={toggleWishlist}
+                        className="p-2.5 rounded-full bg-white/80 hover:bg-white text-stone-700 dark:text-stone-300 transition-all hover:scale-110 shadow-sm"
+                        title="Add to Wishlist"
+                    >
+                        <Heart
+                            className={`h-4 w-4 ${isInWishlist(product.id) ? "fill-red-500 text-red-500" : "currentColor"}`}
+                        />
+                    </button>
+
+                    {/* WhatsApp Button */}
+                    <button
+                        onClick={handleWhatsApp}
+                        className="p-2.5 rounded-full bg-white/80 hover:bg-white text-green-600 transition-all hover:scale-110 shadow-sm"
+                        title="Enquire on WhatsApp"
+                    >
+                        <MessageCircle className="h-4 w-4" />
+                    </button>
+                </div>
 
                 {/* Quick Add Button - Floating Overlay */}
                 {product.stock > 0 && (

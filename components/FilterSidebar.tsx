@@ -85,7 +85,10 @@ export default function FilterSidebar() {
     };
 
     const toggleCategory = (catName: string) => {
-        setExpandedCategories(prev => ({ ...prev, [catName]: !prev[catName] }));
+        setExpandedCategories(prev => {
+            if (prev[catName]) return {};
+            return { [catName]: true };
+        });
     };
 
     return (
@@ -113,7 +116,12 @@ export default function FilterSidebar() {
                         <div key={cat.name} className="space-y-1">
                             <div className="flex items-center justify-between group">
                                 <button
-                                    onClick={() => updateFilter("category", cat.name)}
+                                    onClick={() => {
+                                        updateFilter("category", cat.name);
+                                        if (cat.subcategories.length > 0) {
+                                            setExpandedCategories({ [cat.name]: true });
+                                        }
+                                    }}
                                     className={`flex-1 text-left px-2 py-1.5 rounded-md text-sm transition-colors ${currentCategory === cat.name ? "text-primary font-medium bg-primary/5" : "hover:bg-muted"}`}
                                 >
                                     {cat.name}
