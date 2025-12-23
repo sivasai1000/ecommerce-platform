@@ -36,6 +36,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         };
     }
 
+    let imageUrl = product.imageUrl;
+    // Attempt to parse if it looks like a JSON array string
+    try {
+        if (typeof imageUrl === 'string' && (imageUrl.startsWith('[') || imageUrl.startsWith('{'))) {
+            const parsed = JSON.parse(imageUrl);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                imageUrl = parsed[0];
+            }
+        }
+    } catch {
+        // Fallback to original string if parse fails
+    }
+
     return {
         title: product.name,
         description: `Buy now for ₹${product.price} - ${product.description.substring(0, 100)}...`,
@@ -44,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             description: `Buy now for ₹${product.price} - ${product.description.substring(0, 100)}...`,
             images: [
                 {
-                    url: product.imageUrl,
+                    url: imageUrl,
                     width: 800,
                     height: 600,
                     alt: product.name,
