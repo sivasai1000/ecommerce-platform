@@ -37,6 +37,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     let imageUrl = product.imageUrl;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
     // Attempt to parse if it looks like a JSON array string
     try {
         if (typeof imageUrl === 'string' && (imageUrl.startsWith('[') || imageUrl.startsWith('{'))) {
@@ -49,6 +51,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         // Fallback to original string if parse fails
     }
 
+    // Ensure absolute URL
+    if (imageUrl && !imageUrl.startsWith('http')) {
+        const cleanPath = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
+        imageUrl = `${apiUrl}/${cleanPath}`;
+    }
+
     return {
         title: product.name,
         description: `Buy now for ₹${product.price} - ${product.description.substring(0, 100)}...`,
@@ -56,11 +64,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             title: product.name,
             description: `Buy now for ₹${product.price} - ${product.description.substring(0, 100)}...`,
             type: 'website',
+            images: imageUrl ? [{ url: imageUrl }] : [],
         },
         twitter: {
             card: 'summary_large_image',
             title: product.name,
             description: `Buy now for ₹${product.price} - ${product.description.substring(0, 100)}...`,
+            images: imageUrl ? [imageUrl] : [],
         }
     };
 }
