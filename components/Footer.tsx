@@ -1,36 +1,36 @@
-"use client";
-
 import Link from "next/link";
 import { Facebook, Instagram, Twitter, Mail, MapPin, Phone } from "lucide-react";
 
-import { useEffect, useState } from "react";
-
-export default function Footer() {
-    const [contactInfo, setContactInfo] = useState({
+export default async function Footer() {
+    let contactInfo = {
         address: "123 Fashion Ave, New York, NY 10001",
         phone: "+1 (555) 123-4567",
         email: "support@funstore.com"
-    });
+    };
 
-    useEffect(() => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`)
-            .then(res => res.ok ? res.json() : null)
-            .then(data => {
-                if (data && data.content) {
-                    try {
-                        const parsed = JSON.parse(data.content);
-                        setContactInfo({
-                            address: parsed.address || "123 Fashion Ave, New York, NY 10001",
-                            phone: parsed.phone || "+1 (555) 123-4567",
-                            email: parsed.email || "support@funstore.com"
-                        });
-                    } catch (e) {
-                        // Content is not JSON, potentially legacy HTML, ignore dynamic update for footer fields
-                    }
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, {
+            next: { revalidate: 3600 } // Cache for 1 hour
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.content) {
+                try {
+                    const parsed = JSON.parse(data.content);
+                    contactInfo = {
+                        address: parsed.address || contactInfo.address,
+                        phone: parsed.phone || contactInfo.phone,
+                        email: parsed.email || contactInfo.email
+                    };
+                } catch (e) {
+                    // Ignore JSON parse error, use defaults
                 }
-            })
-            .catch(err => console.error("Failed to fetch contact info for footer", err));
-    }, []);
+            }
+        }
+    } catch (err) {
+        console.error("Failed to fetch contact info for footer", err);
+    }
 
     return (
         <footer className="bg-stone-100 dark:bg-stone-950 text-stone-600 dark:text-stone-400 py-16 border-t border-stone-200 dark:border-stone-800">

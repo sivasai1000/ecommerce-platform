@@ -1,30 +1,17 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { Mail, MapPin, Phone } from "lucide-react";
 
-export default function ContactPage() {
-    const [pageData, setPageData] = useState<{ title: string; content: string } | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+export default async function ContactPage() {
+    let pageData = null;
+    let error = "";
 
-    useEffect(() => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`)
-            .then(res => {
-                if (!res.ok) throw new Error("Failed to fetch Contact page");
-                return res.json();
-            })
-            .then(data => setPageData(data))
-            .catch(err => setError(err.message))
-            .finally(() => setLoading(false));
-    }, []);
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center min-h-[60vh]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-            </div>
-        );
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, {
+            next: { revalidate: 3600 }
+        });
+        if (!res.ok) throw new Error("Failed to fetch Contact page");
+        pageData = await res.json();
+    } catch (err: any) {
+        error = err.message || "Failed to load content";
     }
 
     if (error) {
@@ -45,7 +32,6 @@ export default function ContactPage() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-12">
-                {/* Contact Info / Content */}
                 {/* Contact Info / Content */}
                 <div className="space-y-8">
                     {/* Intro Text */}
@@ -119,7 +105,7 @@ export default function ContactPage() {
                 {/* Contact Form (Visual Only for now) */}
                 <div className="bg-gray-50 p-8 rounded-2xl">
                     <h2 className="text-2xl font-bold mb-6">Send us a message</h2>
-                    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                    <form className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                             <input type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:outline-none" placeholder="Your name" />
