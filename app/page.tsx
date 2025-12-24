@@ -33,7 +33,7 @@ async function getData() {
 
   try {
     const [prodRes, bannerRes, catRes] = await Promise.all([
-      fetch(`${apiUrl}/api/products?isFeatured=true`, { cache: 'no-store' }),
+      fetch(`${apiUrl}/api/products`, { cache: 'no-store' }),
       fetch(`${apiUrl}/api/banners`, { cache: 'no-store' }),
       fetch(`${apiUrl}/api/products/categories`, { cache: 'no-store' })
     ]);
