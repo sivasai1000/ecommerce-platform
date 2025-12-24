@@ -11,7 +11,7 @@ export default async function Footer() {
     let categories = [];
     try {
         const [contactRes, catRes] = await Promise.all([
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, { next: { revalidate: 3600 } }),
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, { cache: 'no-store' }),
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/categories`, { next: { revalidate: 3600 } })
         ]);
 

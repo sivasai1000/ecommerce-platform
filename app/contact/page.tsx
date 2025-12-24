@@ -6,7 +6,7 @@ export default async function ContactPage() {
 
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, {
-            next: { revalidate: 3600 }
+            cache: 'no-store'
         });
         if (!res.ok) throw new Error("Failed to fetch Contact page");
         pageData = await res.json();
