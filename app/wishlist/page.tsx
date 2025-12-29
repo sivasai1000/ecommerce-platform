@@ -40,7 +40,7 @@ export default function WishlistPage() {
                         const isAddedToCart = cartItems.some(cartItem => cartItem.id === item.id);
 
                         return (
-                            <Card key={item.id} className="overflow-hidden">
+                            <Card key={item.id} className="overflow-hidden p-0 gap-0">
                                 <div className="aspect-square relative overflow-hidden bg-gray-100">
                                     <Link href={`/product/${encodeURIComponent(item.name.replace(/\s+/g, '-'))}`} className="block h-full w-full">
                                         <img

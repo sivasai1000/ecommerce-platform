@@ -91,7 +91,7 @@ function BlogList() {
                         <div className="grid gap-6 md:grid-cols-2">
                             {blogs.length > 0 ? (
                                 blogs.map((blog) => (
-                                    <Card key={blog.id} className="flex flex-col">
+                                    <Card key={blog.id} className="flex flex-col p-0 pb-6">
                                         {blog.imageUrl && (
                                             <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                                                 <img
