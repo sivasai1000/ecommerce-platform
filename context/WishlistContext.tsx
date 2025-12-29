@@ -44,15 +44,27 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
                 // If backend returns { id, Product: {...} }, we need to map it to WishlistItem format
                 // Checking backend controller... it returns `wishlist` array.
                 // Each item has `Product`.
-                const mappedItems = data.map((item: any) => ({
-                    id: item.Product.id,
-                    name: item.Product.name,
-                    price: Number(item.Product.price),
-                    image: item.Product.imageUrl || "/placeholder-image.png", // Ensure fallback at source
-                    category: item.Product.category,
-                    stock: item.Product.stock,
-                    wishlistId: item.id // Store the wishlist record ID if needed for deletion
-                }));
+                const mappedItems = data.map((item: any) => {
+                    let finalImage = item.Product.imageUrl;
+                    try {
+                        if (finalImage && (finalImage.startsWith('[') || finalImage.startsWith('{'))) {
+                            const parsed = JSON.parse(finalImage);
+                            if (Array.isArray(parsed) && parsed.length > 0) finalImage = parsed[0];
+                        }
+                    } catch (e) {
+                        // Keep original if parsing fails
+                    }
+
+                    return {
+                        id: item.Product.id,
+                        name: item.Product.name,
+                        price: Number(item.Product.price),
+                        image: finalImage || "/placeholder-image.png",
+                        category: item.Product.category,
+                        stock: item.Product.stock,
+                        wishlistId: item.id
+                    };
+                });
                 setWishlistItems(mappedItems);
             }
         } catch (error) {
