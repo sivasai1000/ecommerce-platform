@@ -5,7 +5,7 @@ export default async function Footer() {
     let contactInfo = {
         address: "123 Fashion Ave, New York, NY 10001",
         phone: "+1 (555) 123-4567",
-        email: "support@funstore.com"
+        email: "support@FUNNY.com"
     };
 
     let categories = [];
@@ -43,7 +43,7 @@ export default async function Footer() {
                     {/* Brand Column */}
                     <div className="space-y-4">
                         <h3 className="text-2xl font-serif font-bold text-stone-900 dark:text-stone-50">
-                            FUNSTORE.
+                            FUNNY.
                         </h3>
                         <p className="text-sm leading-relaxed">
                             Curated fashion and lifestyle essentials for the modern aesthetic. Quality, design, and sustainability at our core.
@@ -110,7 +110,7 @@ export default async function Footer() {
                 </div>
 
                 <div className="border-t border-stone-200 dark:border-stone-800 pt-8 text-center text-xs uppercase tracking-widest text-stone-500">
-                    <p>&copy; {new Date().getFullYear()} FUNSTORE. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} FUNNY. All rights reserved.</p>
                 </div>
             </div>
         </footer>

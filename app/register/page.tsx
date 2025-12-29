@@ -52,7 +52,7 @@ export default function RegisterPage() {
                 <div className="relative h-full flex flex-col justify-between p-12 text-stone-50">
                     <div className="flex items-center space-x-2">
                         <span className="text-2xl font-serif font-bold tracking-tight">
-                            FUNSTORE.
+                            FUNNY.
                         </span>
                     </div>
                     <div className="space-y-4">
