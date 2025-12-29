@@ -166,7 +166,7 @@ export default function ProductClient({ product }: ProductClientProps) {
                     </div>
                 </div>
 
-                <div className="space-y-8">
+                <div className="space-y-8 sticky top-24 h-fit">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
                         <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">

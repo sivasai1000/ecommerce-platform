@@ -108,21 +108,21 @@ export default function ProductCard({ product }: ProductCardProps) {
                     {/* Wishlist Button */}
                     <button
                         onClick={toggleWishlist}
-                        className="p-2.5 rounded-full bg-white/80 hover:bg-white text-stone-700 dark:text-stone-300 transition-all hover:scale-110 shadow-sm"
+                        className="p-2 md:p-2.5 rounded-full bg-white/80 hover:bg-white text-stone-700 dark:text-stone-300 transition-all hover:scale-110 shadow-sm"
                         title="Add to Wishlist"
                     >
                         <Heart
-                            className={`h-4 w-4 ${isInWishlist(product.id) ? "fill-red-500 text-red-500" : "currentColor"}`}
+                            className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isInWishlist(product.id) ? "fill-red-500 text-red-500" : "currentColor"}`}
                         />
                     </button>
 
                     {/* WhatsApp Button */}
                     <button
                         onClick={handleWhatsApp}
-                        className="p-2.5 rounded-full bg-white/80 hover:bg-white text-green-600 transition-all hover:scale-110 shadow-sm"
+                        className="p-2 md:p-2.5 rounded-full bg-white/80 hover:bg-white text-green-600 transition-all hover:scale-110 shadow-sm"
                         title="Enquire on WhatsApp"
                     >
-                        <MessageCircle className="h-4 w-4" />
+                        <MessageCircle className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     </button>
                 </div>
 
