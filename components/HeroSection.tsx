@@ -72,7 +72,7 @@ export default function HeroSection({ banners }: HeroSectionProps) {
                 )}
                 {banners.length === 0 && (
                     <div className="text-center">
-                        <h1 className="text-4xl">Welcome to FUNNY.</h1>
+                        <h1 className="text-4xl">Welcome to FUNSTORE.</h1>
                     </div>
                 )}
             </div>

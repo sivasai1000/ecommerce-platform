@@ -71,7 +71,7 @@ export default function Navbar() {
                         <div className="flex flex-col h-full bg-white dark:bg-stone-950">
                             <div className="p-6 border-b border-stone-100 dark:border-stone-800">
                                 <Link href="/" onClick={closeMobileMenu} className="text-2xl font-serif font-bold tracking-tight">
-                                    FUNNY.
+                                    FUNSTORE.
                                 </Link>
                             </div>
                             <nav className="flex flex-col p-6 space-y-6">
@@ -95,7 +95,7 @@ export default function Navbar() {
                 {/* Logo */}
                 <Link href="/" className="mr-2 md:mr-6 flex items-center space-x-2">
                     <span className="text-xl md:text-2xl font-serif font-bold tracking-tight text-stone-900 dark:text-stone-50">
-                        FUNNY.
+                        FUNSTORE.
                     </span>
                 </Link>
 
