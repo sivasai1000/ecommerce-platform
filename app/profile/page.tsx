@@ -187,7 +187,7 @@ export default function ProfilePage() {
                         </p>
                     </CardContent>
                     <CardFooter className="flex justify-center border-t pt-6">
-                        <Button variant="destructive" width="full" onClick={logout} className="w-full">
+                        <Button variant="destructive" onClick={logout} className="w-full">
                             <LogOut className="w-4 h-4 mr-2" />
                             Log Out
                         </Button>
