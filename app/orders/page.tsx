@@ -28,6 +28,9 @@ interface Order {
     totalAmount: number;
     status: string;
     createdAt: string;
+    paymentId: string;
+    trackingId?: string;
+    courierName?: string;
     OrderItems: OrderItem[];
 }
 
@@ -159,17 +162,22 @@ export default function OrdersPage() {
                 <div className="space-y-6">
                     {orders.map((order) => (
                         <Card key={order.id}>
-                            <CardHeader className="bg-muted/40 flex flex-row items-center justify-between pb-4">
+                            <CardHeader className="bg-muted/40 flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 gap-4">
                                 <div>
                                     <CardTitle className="text-lg">Order #{order.id}</CardTitle>
                                     <p className="text-sm text-muted-foreground">
                                         Placed on {new Date(order.createdAt).toLocaleDateString()}
                                     </p>
+                                    {order.trackingId && (
+                                        <p className="text-sm font-medium text-blue-600 mt-1">
+                                            Tracking: {order.trackingId} <span className="text-muted-foreground">({order.courierName || 'Courier'})</span>
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <span className="font-bold">₹{Number(order.totalAmount).toFixed(2)}</span>
-                                    <Badge variant={order.status === 'completed' ? 'default' : 'secondary'}>
-                                        {order.status}
+                                    <Badge variant={order.status === 'completed' ? 'default' : (order.status === 'cancelled' ? 'destructive' : 'secondary')}>
+                                        {order.status.toUpperCase()}
                                     </Badge>
                                 </div>
                             </CardHeader>

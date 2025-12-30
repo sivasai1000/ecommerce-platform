@@ -7,6 +7,13 @@ interface User {
     id: number;
     email: string;
     name: string;
+    mobile?: string;
+    role?: string;
+    profilePicture?: string;
+    address?: any;
+    bio?: string;
+    gender?: string;
+    dateOfBirth?: string;
 }
 
 interface AuthContextType {
@@ -14,6 +21,7 @@ interface AuthContextType {
     token: string | null;
     login: (token: string, user: User) => void;
     logout: () => void;
+    updateUser: (user: User) => void;
     register: (userData: any) => Promise<boolean>;
     isAuthenticated: boolean;
     isLoading: boolean;
@@ -53,6 +61,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         router.push("/");
+    };
+
+    const updateUser = (updatedUser: User) => {
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
     };
 
     const register = async (userData: any) => {
@@ -102,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 token,
                 login,
                 logout,
+                updateUser,
                 register,
                 isAuthenticated: !!token,
                 isLoading,

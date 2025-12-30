@@ -49,8 +49,12 @@ export default function CheckoutPage() {
         await applyCoupon(couponCode);
     };
 
+    const [paymentMethod, setPaymentMethod] = useState<'ONLINE' | 'COD'>('ONLINE');
+    const [submitting, setSubmitting] = useState(false);
+
     const handlePlaceOrder = async (e: React.FormEvent) => {
         e.preventDefault();
+        setSubmitting(true);
 
         const form = e.target as HTMLFormElement;
         const address = (form.elements.namedItem('address') as HTMLInputElement).value;
@@ -58,11 +62,13 @@ export default function CheckoutPage() {
         const zip = (form.elements.namedItem('zip') as HTMLInputElement).value;
         const fullAddress = `${address}, ${city}, ${zip}`;
 
-        const res = await loadRazorpayScript();
-
-        if (!res) {
-            toast.error("Razorpay SDK failed to load. Are you online?");
-            return;
+        if (paymentMethod === 'ONLINE') {
+            const res = await loadRazorpayScript();
+            if (!res) {
+                toast.error("Razorpay SDK failed to load. Are you online?");
+                setSubmitting(false);
+                return;
+            }
         }
 
         try {
@@ -76,7 +82,8 @@ export default function CheckoutPage() {
                 body: JSON.stringify({
                     items: cartItems.map(item => ({ ...item, productId: item.id })),
                     totalAmount: finalTotal,
-                    address: fullAddress
+                    address: fullAddress,
+                    paymentMethod: paymentMethod // Pass payment method
                 })
             });
 
@@ -86,7 +93,15 @@ export default function CheckoutPage() {
             }
             const orderData = await orderRes.json();
 
-            // 2. Open Razorpay Checkout
+            if (paymentMethod === 'COD') {
+                // Determine order success immediately for COD
+                toast.success("Order Placed Successfully!");
+                clearCart();
+                router.push("/orders");
+                return;
+            }
+
+            // 2. Open Razorpay Checkout (Only for ONLINE)
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_placeholder",
                 amount: orderData.amount,
@@ -94,7 +109,7 @@ export default function CheckoutPage() {
                 name: "E-Commerce Store",
                 description: appliedCoupon ? `Order with Coupon ${appliedCoupon}` : "Transaction",
                 image: "https://example.com/logo.png",
-                order_id: orderData.id,
+                order_id: orderData.id, // Razorpay Order ID
                 handler: async function (response: any) {
                     // 3. Verify Payment on Server
                     const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/orders/verify`, {
@@ -120,9 +135,7 @@ export default function CheckoutPage() {
                         verifyData = { message: "Invalid JSON response" };
                     }
 
-                    console.log("Verification Response:", verifyData); // Validating server response
-
-                    if (verifyRes.ok) { // Check for HTTP 200 OK
+                    if (verifyRes.ok) {
                         toast.success("Payment Successful! Order placed.");
                         clearCart();
                         router.push("/orders");
@@ -133,7 +146,7 @@ export default function CheckoutPage() {
                 prefill: {
                     name: user?.name || "User",
                     email: user?.email || "user@example.com",
-                    contact: "9999999999",
+                    contact: user?.mobile || "9999999999",
                 },
                 theme: { color: "#0F172A" },
             };
@@ -147,6 +160,8 @@ export default function CheckoutPage() {
         } catch (error: any) {
             console.error("Payment Flow Error:", error);
             toast.error(error.message || "Something went wrong");
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -194,16 +209,37 @@ export default function CheckoutPage() {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="address">Address</Label>
-                                <Input id="address" name="address" placeholder="123 Main St" required />
+                                <Input id="address" name="address" defaultValue={typeof user?.address === 'object' ? user?.address?.street : ''} required />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="city">City</Label>
-                                    <Input id="city" name="city" required />
+                                    <Input id="city" name="city" defaultValue={typeof user?.address === 'object' ? user?.address?.city : ''} required />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="zip">Zip Code</Label>
-                                    <Input id="zip" name="zip" required />
+                                    <Input id="zip" name="zip" defaultValue={typeof user?.address === 'object' ? user?.address?.zip : ''} required />
+                                </div>
+                            </div>
+
+                            {/* Payment Method Selection */}
+                            <div className="pt-4 border-t space-y-3">
+                                <Label className="text-base">Payment Method</Label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div
+                                        className={`border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors flex flex-col items-center justify-center gap-2 ${paymentMethod === 'ONLINE' ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''}`}
+                                        onClick={() => setPaymentMethod('ONLINE')}
+                                    >
+                                        <div className="font-bold">Online Payment</div>
+                                        <div className="text-xs text-muted-foreground">UPI, Cards, Netbanking</div>
+                                    </div>
+                                    <div
+                                        className={`border rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors flex flex-col items-center justify-center gap-2 ${paymentMethod === 'COD' ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''}`}
+                                        onClick={() => setPaymentMethod('COD')}
+                                    >
+                                        <div className="font-bold">Cash on Delivery</div>
+                                        <div className="text-xs text-muted-foreground">Pay when you receive</div>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -265,8 +301,8 @@ export default function CheckoutPage() {
                             </div>
                         </div>
 
-                        <Button type="submit" form="checkout-form" className="w-full mt-4" size="lg">
-                            Pay with Razorpay
+                        <Button type="submit" form="checkout-form" className="w-full mt-4" size="lg" disabled={submitting}>
+                            {submitting ? "Processing..." : (paymentMethod === 'ONLINE' ? "Pay with Razorpay" : "Place Order (COD)")}
                         </Button>
                     </CardContent>
                 </Card>
