@@ -173,7 +173,7 @@ export default function Navbar() {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon" className="rounded-full ml-1 md:ml-2">
                                     <Avatar className="h-8 w-8 border border-stone-200">
-                                        <AvatarImage src="/avatars/01.png" alt="@user" />
+                                        <AvatarImage src={user?.profilePicture || "/avatars/01.png"} alt="@user" className="object-cover" />
                                         <AvatarFallback className="bg-stone-100 text-stone-600 font-serif text-xs">{user?.name?.[0]?.toUpperCase() || "U"}</AvatarFallback>
                                     </Avatar>
                                 </Button>

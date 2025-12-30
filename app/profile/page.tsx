@@ -14,7 +14,7 @@ import { LogOut, Upload, User as UserIcon, MapPin, Calendar, Edit2, Save, X, Pho
 import { toast } from "sonner";
 
 export default function ProfilePage() {
-    const { user, logout, updateUser, isAuthenticated, token } = useAuth();
+    const { user, logout, updateUser, isAuthenticated, token, isLoading } = useAuth();
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -37,6 +37,8 @@ export default function ProfilePage() {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     useEffect(() => {
+        if (isLoading) return; // Wait for auth check
+
         if (!isAuthenticated) {
             router.push("/login");
         } else if (user) {

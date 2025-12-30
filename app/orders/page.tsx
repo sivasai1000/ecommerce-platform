@@ -160,7 +160,7 @@ export default function OrdersPage() {
                 </div>
             ) : (
                 <div className="space-y-6">
-                    {orders.map((order) => (
+                    {orders.filter(o => o.OrderItems && o.OrderItems.length > 0).map((order) => (
                         <Card key={order.id}>
                             <CardHeader className="bg-muted/40 flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 gap-4">
                                 <div>
