@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Loader2, MessageCircle } from "lucide-react";
+import { Loader2, MessageCircle, CheckCircle2, Circle, Truck, Package } from "lucide-react";
 import { toast } from "sonner";
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface OrderItem {
     id: number;
