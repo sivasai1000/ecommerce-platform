@@ -189,7 +189,7 @@ export default function OrdersPage() {
                                                 <div className="h-16 w-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                                                     {item.Product?.imageUrl && (
                                                         <img
-                                                            src={item.Product.imageUrl}
+                                                            src={item.Product.imageUrl.startsWith('http') ? item.Product.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${item.Product.imageUrl}`}
                                                             alt={item.Product.name}
                                                             className="h-full w-full object-cover"
                                                         />

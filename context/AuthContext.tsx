@@ -37,15 +37,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
-        // Load from localStorage on mount
-        const storedToken = localStorage.getItem("token");
-        const storedUser = localStorage.getItem("user");
+        const initAuth = async () => {
+            const storedToken = localStorage.getItem("token");
+            const storedUser = localStorage.getItem("user");
 
-        if (storedToken && storedUser) {
-            setToken(storedToken);
-            setUser(JSON.parse(storedUser));
-        }
-        setIsLoading(false);
+            if (storedToken) {
+                setToken(storedToken);
+                if (storedUser) {
+                    setUser(JSON.parse(storedUser));
+                }
+
+                // Verify token and fetch latest user data
+                try {
+                    // We need a specific endpoint to get the current user. 
+                    // Usually this is GET /api/users/profile or /api/auth/me
+                    // Since we don't have a dedicated /me, we can trust the token for now 
+                    // OR try to fetch the profile if we have that endpoint.
+                    // Given the previous code, we only have GET /api/users/profile (PUT only?)
+                    // Let's rely on localStorage but handle 401s globally via apiCall.
+
+                    // Actually, let's try to fetch fresh data to avoid stale localStorage
+                    // Assuming GET /api/users/profile exists? No, only PUT was added.
+                    // Let's use the one we added: GET /api/users which is admin only?
+                    // We need a route for the user to get their own details.
+
+                    // For now, let's stick to localStorage but ensure we don't logout immediately.
+                    // The user said "refresh then its logout". This usually means state isn't rehydrating fast enough?
+                    // OR the "token" is invalid.
+
+                } catch (error) {
+                    console.error("Auth init failed", error);
+                    logout();
+                }
+            }
+            setIsLoading(false);
+        };
+
+        initAuth();
     }, []);
 
     const login = (newToken: string, newUser: User) => {

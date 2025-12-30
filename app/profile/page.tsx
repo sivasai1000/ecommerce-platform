@@ -151,7 +151,7 @@ export default function ProfilePage() {
                     <CardHeader className="text-center">
                         <div className="relative mx-auto mb-4">
                             <Avatar className="h-32 w-32 border-4 border-background shadow-xl">
-                                <AvatarImage src={previewImage || "/avatars/01.png"} className="object-cover" />
+                                <AvatarImage src={previewImage || user.profilePicture || ""} className="object-cover" />
                                 <AvatarFallback className="text-4xl">{user.name[0]?.toUpperCase()}</AvatarFallback>
                             </Avatar>
                             {isEditing && (
