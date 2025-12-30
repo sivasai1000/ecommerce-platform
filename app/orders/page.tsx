@@ -46,6 +46,7 @@ export default function OrdersPage() {
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [trackingOrder, setTrackingOrder] = useState<Order | null>(null);
 
     const handleOrderHelp = (orderId: number, productName: string) => {
         if (!contactInfo.phone) {
@@ -170,9 +171,17 @@ export default function OrdersPage() {
                                         Placed on {new Date(order.createdAt).toLocaleDateString()}
                                     </p>
                                     {order.trackingId && (
-                                        <p className="text-sm font-medium text-blue-600 mt-1">
-                                            Tracking: {order.trackingId} <span className="text-muted-foreground">({order.courierName || 'Courier'})</span>
-                                        </p>
+                                        <div className="mt-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="gap-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                                                onClick={() => setTrackingOrder(order)}
+                                            >
+                                                <Truck className="w-4 h-4" />
+                                                Track Package
+                                            </Button>
+                                        </div>
                                     )}
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -274,6 +283,49 @@ export default function OrdersPage() {
                     ))}
                 </div>
             )}
+
+            {/* Tracking Dialog */}
+            <Dialog open={!!trackingOrder} onOpenChange={(open) => !open && setTrackingOrder(null)}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Tracking Detials</DialogTitle>
+                        <DialogDescription>
+                            Order #{trackingOrder?.id} • {trackingOrder?.courierName}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6 py-4">
+                        <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Tracking ID</p>
+                                <p className="font-mono font-bold tracking-wider">{trackingOrder?.trackingId}</p>
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                                navigator.clipboard.writeText(trackingOrder?.trackingId || "");
+                                toast.success("Copied to clipboard");
+                            }}>
+                                Copy
+                            </Button>
+                        </div>
+
+                        <div className="relative border-l-2 border-muted ml-4 space-y-8 pb-4">
+                            {[
+                                { status: "Order Placed", date: new Date(trackingOrder?.createdAt || "").toLocaleDateString(), active: true, icon: CheckCircle2 },
+                                { status: "Shipped", date: "In Progress", active: true, icon: Package },
+                                { status: "Out for Delivery", date: "Pending", active: false, icon: Truck },
+                                { status: "Delivered", date: "Pending", active: false, icon: CheckCircle2 },
+                            ].map((step, i) => (
+                                <div key={i} className="relative pl-8">
+                                    <span className={`absolute -left-[9px] bg-background p-1 ${step.active ? "text-green-600" : "text-muted-foreground"}`}>
+                                        <step.icon className={`w-4 h-4 ${step.active ? "fill-green-100" : ""}`} />
+                                    </span>
+                                    <h4 className={`text-sm font-medium ${step.active ? "" : "text-muted-foreground"}`}>{step.status}</h4>
+                                    <p className="text-xs text-muted-foreground">{step.date}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
