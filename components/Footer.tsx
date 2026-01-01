@@ -18,14 +18,17 @@ export default async function Footer() {
         if (contactRes.ok) {
             const data = await contactRes.json();
             if (data && data.content) {
-                try {
-                    const parsed = JSON.parse(data.content);
-                    contactInfo = {
-                        address: parsed.address || contactInfo.address,
-                        phone: parsed.phone || contactInfo.phone,
-                        email: parsed.email || contactInfo.email
-                    };
-                } catch (e) { }
+                // Backend now sends JSON object for content, or fallback to string
+                let parsed = data.content;
+                if (typeof parsed === 'string') {
+                    try { parsed = JSON.parse(parsed); } catch (e) { }
+                }
+
+                contactInfo = {
+                    address: parsed.address || contactInfo.address,
+                    phone: parsed.phone || contactInfo.phone,
+                    email: parsed.email || contactInfo.email
+                };
             }
         }
 

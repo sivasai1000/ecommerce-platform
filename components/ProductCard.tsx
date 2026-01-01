@@ -54,7 +54,6 @@ export default function ProductCard({ product }: ProductCardProps) {
         e.stopPropagation();
         if (isInWishlist(product.id)) {
             removeFromWishlist(product.id);
-            toast.info("Removed from wishlist");
         } else {
             addToWishlist({
                 id: product.id,
@@ -64,7 +63,6 @@ export default function ProductCard({ product }: ProductCardProps) {
                 category: product.category,
                 stock: product.stock
             });
-            toast.success("Added to wishlist");
         }
     };
 

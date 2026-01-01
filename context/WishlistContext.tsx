@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
+import { toast } from "sonner";
 
 interface WishlistItem {
     id: number;
@@ -74,13 +75,16 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
     const addToWishlist = async (item: WishlistItem) => {
         if (!isAuthenticated || !token) {
-            alert("Please login to add to wishlist");
+            toast.error("Please login to add to wishlist");
             return;
         }
 
         // Optimistic update
         const tempId = item.id;
-        if (wishlistItems.find((i) => i.id === item.id)) return;
+        if (wishlistItems.find((i) => i.id === item.id)) {
+            toast.info("Item already in wishlist");
+            return;
+        }
         setWishlistItems((prev) => [...prev, item]);
 
         try {
@@ -96,14 +100,16 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
                 // Revert on failure
                 setWishlistItems((prev) => prev.filter((i) => i.id !== item.id));
                 const errorData = await res.json();
-                alert(errorData.message || "Failed to add to wishlist");
+                toast.error(errorData.message || "Failed to add to wishlist");
             } else {
+                toast.success("Added to wishlist");
                 // Refresh to get correct IDs if needed, or just leave it
                 fetchWishlist();
             }
         } catch (error) {
             console.error(error);
             setWishlistItems((prev) => prev.filter((i) => i.id !== item.id));
+            toast.error("Failed to add to wishlist");
         }
     };
 
@@ -112,6 +118,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
         // Optimistic update
         setWishlistItems((prev) => prev.filter((item) => item.id !== id));
+        toast.info("Removed from wishlist");
 
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/wishlist/${id}`, {
@@ -120,11 +127,12 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
             });
             if (!res.ok) {
                 fetchWishlist(); // Revert/Refresh
-                alert("Failed to remove from wishlist");
+                toast.error("Failed to remove from wishlist");
             }
         } catch (error) {
             console.error(error);
             fetchWishlist();
+            toast.error("Error removing from wishlist");
         }
     };
 

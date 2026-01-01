@@ -36,13 +36,54 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
     useEffect(() => {
-        const storageKey = user ? `cart_${user.id}` : "cart_guest";
-        const storedCart = localStorage.getItem(storageKey);
-        if (storedCart) {
-            setCartItems(JSON.parse(storedCart));
-        } else {
-            setCartItems([]);
-        }
+        const loadCart = () => {
+            if (user) {
+                // User is logged in
+                const userKey = `cart_${user.id}`;
+                const guestKey = "cart_guest";
+                const userCartStr = localStorage.getItem(userKey);
+                const guestCartStr = localStorage.getItem(guestKey);
+
+                let finalCart: CartItem[] = [];
+
+                // Load user cart
+                if (userCartStr) {
+                    finalCart = JSON.parse(userCartStr);
+                }
+
+                // Merge guest cart if exists
+                if (guestCartStr) {
+                    const guestCart: CartItem[] = JSON.parse(guestCartStr);
+                    if (guestCart.length > 0) {
+                        guestCart.forEach(guestItem => {
+                            const existingIndex = finalCart.findIndex(i => i.id === guestItem.id);
+                            if (existingIndex > -1) {
+                                // Add quantities
+                                finalCart[existingIndex].quantity += guestItem.quantity;
+                            } else {
+                                finalCart.push(guestItem);
+                            }
+                        });
+                        // Save merged cart to user key
+                        localStorage.setItem(userKey, JSON.stringify(finalCart));
+                        // Clear guest cart
+                        localStorage.removeItem(guestKey);
+                        toast.success("Guest cart merged with your account");
+                    }
+                }
+                setCartItems(finalCart);
+            } else {
+                // Guest User
+                const guestKey = "cart_guest";
+                const guestCart = localStorage.getItem(guestKey);
+                if (guestCart) {
+                    setCartItems(JSON.parse(guestCart));
+                } else {
+                    setCartItems([]);
+                }
+            }
+        };
+        loadCart();
     }, [user]);
 
     useEffect(() => {

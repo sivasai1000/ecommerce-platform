@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        router.push("/");
+        router.push("/login"); // Redirect to login page
     };
 
     const updateUser = (updatedUser: User) => {
@@ -126,7 +126,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             if (res.status === 401 || res.status === 403) {
                 // Token invalid or expired
-                logout();
+                // Only redirect if we were previously authenticated (had a token) to avoid loops on public pages
+                if (currentToken) {
+                    logout();
+                }
                 return null;
             }
             return res;
